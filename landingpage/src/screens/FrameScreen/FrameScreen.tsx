@@ -30,7 +30,7 @@ export const FrameScreen = (): JSX.Element => {
 
   return (
     <div
-      className="bg-white overflow-hidden w-full min-w-[1440px] min-h-[9303px] relative"
+      className="bg-white overflow-hidden w-full relative"
       data-model-id="570:9788"
     >
       <Frame />
@@ -46,7 +46,7 @@ export const FrameScreen = (): JSX.Element => {
       {/* Floating Chat Widget */}
       <button
         onClick={() => setShowChat(!showChat)}
-        className="fixed bottom-8 right-8 w-[100px] h-[100px] z-50 transition-all duration-300 hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-orange-400"
+        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 w-16 h-16 md:w-[100px] md:h-[100px] z-50 transition-all duration-300 hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-orange-400"
         aria-label="Open chat"
       >
         <img
@@ -58,7 +58,7 @@ export const FrameScreen = (): JSX.Element => {
 
       {/* Chat Modal */}
       {showChat && (
-        <div className="fixed bottom-32 right-8 w-[350px] bg-white rounded-2xl shadow-2xl z-50 animate-fade-in">
+        <div className="fixed bottom-24 right-4 md:bottom-32 md:right-8 w-[calc(100vw-2rem)] max-w-[350px] bg-white rounded-2xl shadow-2xl z-50 animate-fade-in">
           <div className="bg-gradient-to-r from-orange-500 to-yellow-500 p-4 rounded-t-2xl flex justify-between items-center">
             <h3 className="text-white font-semibold text-lg">Live Chat Support</h3>
             <button
@@ -90,7 +90,7 @@ export const FrameScreen = (): JSX.Element => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-32 right-8 w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-orange-400 animate-fade-in"
+          className="fixed bottom-24 right-4 md:bottom-32 md:right-8 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-orange-400 animate-fade-in"
           aria-label="Scroll to top"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
