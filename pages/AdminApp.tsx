@@ -45,6 +45,7 @@ const AdminPopups = lazy(() => import(/* webpackChunkName: "admin-popups" */ './
 const AdminFacebookPixel = lazy(() => import(/* webpackChunkName: "admin-pixel" */ './AdminFacebookPixel'));
 const AdminGTM = lazy(() => import(/* webpackChunkName: "admin-gtm" */ './AdminGTM'));
 const AdminLandingPage = lazy(() => import(/* webpackChunkName: "admin-landing" */ './AdminLandingPage'));
+const StoreStudio = lazy(() => import(/* webpackChunkName: "store-studio" */ '../components/PageBuilder'));
 const AdminTenantManagement = lazy(() => import(/* webpackChunkName: "admin-tenant" */ './AdminTenantManagement'));
 const AdminSupport = lazy(() => import(/* webpackChunkName: "admin-support" */ './AdminSupport'));
 const AdminFigmaIntegration = lazy(() => import(/* webpackChunkName: "admin-figma" */ './AdminFigmaIntegration'));
@@ -222,6 +223,7 @@ const adminUrlMap: Record<string, string> = {
   'customers_reviews': '/customers',
   'customization': '/customization',
   'landing_pages': '/landing-pages',
+  'store_studio': '/store-studio',
   'gallery': '/gallery',
   'business_report_purchase': '/reports',
   'business_report_expense': '/reports',
@@ -633,6 +635,7 @@ const AdminApp: React.FC<AdminAppProps> = ({
             adminSection === 'orders' ? <AdminOrders orders={orders} courierConfig={courierConfig} onUpdateOrder={onUpdateOrder} /> :
               adminSection === 'products' ? <AdminProducts products={products} categories={categories} subCategories={subCategories} childCategories={childCategories} brands={brands} tags={tags} onAddProduct={onAddProduct} onUpdateProduct={onUpdateProduct} onDeleteProduct={onDeleteProduct} onBulkDelete={onBulkDeleteProducts} onBulkUpdate={onBulkUpdateProducts} tenantId={activeTenantId} onAddCategory={catHandlers.add} onAddSubCategory={subCatHandlers.add} onAddChildCategory={childCatHandlers.add} onAddTag={tagHandlers.add} onLogout={onLogout} onSwitchSection={setAdminSection} activeSection={adminSection} /> :
                 adminSection === 'product-upload' ? <AdminProductUpload categories={categories} subCategories={subCategories} childCategories={childCategories} brands={brands} tags={tags} onAddProduct={onAddProduct} onLogout={onLogout} onSwitchSection={setAdminSection} /> :
+                  adminSection === 'store_studio' ? <StoreStudio tenantId={activeTenantId} /> :
                   adminSection === 'landing_pages' ? <AdminLandingPage tenantSubdomain={selectedTenantRecord?.subdomain || ''} products={products} landingPages={landingPages} onCreateLandingPage={onCreateLandingPage} onUpdateLandingPage={onUpsertLandingPage} onTogglePublish={onToggleLandingPublish} onPreviewLandingPage={handlePreviewLandingPage} /> :
                     adminSection === 'due_list' ? <AdminDueList user={user} onLogout={onLogout} /> :
                       adminSection === 'inventory' ? <AdminInventory products={products} tenantId={activeTenantId} /> :

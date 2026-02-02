@@ -79,6 +79,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = memo(({ activePage, onN
 	// Configuration items
 	const configItems = [
 		{ id: 'customization', icon: <Sliders size={18} />, label: 'Customization', resource: 'customization' },
+		{ id: 'store_studio', icon: <Layers size={18} />, label: 'Store Studio', resource: 'customization' },
 		{ id: 'landing_pages', icon: <FileText size={18} />, label: 'Landing Page', resource: 'landing_pages' },
                 { id: 'popups', icon: <FileText size={18} />, label: 'Popups', resource: 'customization' },
 		{ id: 'gallery', icon: <ImageIcon size={18} />, label: 'Gallery', resource: 'gallery' },
