@@ -278,6 +278,17 @@ export function useNavigation({ products, user, landingPages, setSelectedLanding
     // This should be checked after all other routes
     if (trimmedPath && !trimmedPath.includes('/') && /^[a-z0-9-]+$/i.test(trimmedPath)) {
       console.log('[Navigation] Checking if path is a landing page slug:', trimmedPath);
+      
+      // First check if it's a landing page from the landing_pages collection
+      const matchedLandingPage = landingPagesRef.current.find(lp => lp.urlSlug === trimmedPath && lp.status === 'published');
+      if (matchedLandingPage) {
+        console.log('[Navigation] Matched landing page:', matchedLandingPage.id);
+        setSelectedLandingPage(matchedLandingPage);
+        setCurrentView('landing_preview');
+        return;
+      }
+      
+      // Otherwise, treat it as an offer page slug
       setSelectedOfferSlug(trimmedPath);
       setCurrentView('offer_preview');
       return;
