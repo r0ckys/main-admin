@@ -1,9 +1,21 @@
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer components {
   .all-\[unset\] {
     all: unset;
+  }
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
   }
 }
 
