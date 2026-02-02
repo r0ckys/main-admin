@@ -115,6 +115,27 @@
   }
 }
 
+
+/* --- 4.1 RESPONSIVE SCALE WRAPPER --- */
+.frame-scale-wrapper {
+  --scale: min(calc(100vw / 1440), 1.333333);
+  width: 1440px;
+  height: calc(9153px * var(--scale));
+  margin: 0 auto;
+  overflow: hidden;
+  transform: scale(var(--scale));
+  transform-origin: top center;
+}
+
+.frame {
+  width: 1440px !important;
+  min-width: 1440px !important;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* --- 5. YOUR ORIGINAL CSS (REMAINDER) --- */
 /* The rest of your specific element styling starts here... */
 
