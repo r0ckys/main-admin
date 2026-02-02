@@ -178,7 +178,7 @@ export const Frame3 = (): JSX.Element => {
                 <div className="relative top-[calc(50.00%_-_9px)] left-[calc(50.00%_-_9px)] w-[18px] h-[18px] bg-white rounded-[9px] border border-solid border-[#3854f8]" />
               </div>
               <div className="relative w-fit [font-family:'Questrial',Helvetica] font-normal text-[#454452] text-base tracking-[0] leading-[normal]">
-                Warehouse Facilities (Guanzu, Chaina)
+                Warehouse Facilities (Guanzu, China)
               </div>
             </div>
 
