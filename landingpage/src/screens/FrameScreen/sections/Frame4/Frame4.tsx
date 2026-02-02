@@ -117,7 +117,7 @@ export const Frame4 = (): JSX.Element => {
                   <br />
                 </span>
                 <span className="[font-family:'Poppins',Helvetica] font-normal text-[#4e4e4e] text-sm md:text-base tracking-[0] leading-6">
-                  Create professional  E-commerce websites instantly without any
+                  Create professional E-commerce websites instantly without any
                   coding.
                 </span>
               </p>
