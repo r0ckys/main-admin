@@ -115,13 +115,37 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
   const [layout, setLayout] = useState<StoreLayoutData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storeStudioEnabled, setStoreStudioEnabled] = useState(false);
+  const [productDisplayOrder, setProductDisplayOrder] = useState<number[]>([]);
 
   const flashSaleCountdown = useFlashSaleCountdown();
 
-  // Compute product lists
+  // Apply product display order if store studio is enabled
+  const orderedProducts = useMemo(() => {
+    if (!storeStudioEnabled || !productDisplayOrder || productDisplayOrder.length === 0) {
+      return products;
+    }
+
+    // Create a map for quick lookup
+    const productMap = new Map(products.map(p => [p.id, p]));
+    
+    // Build ordered array based on saved order
+    const ordered = productDisplayOrder
+      .map(id => productMap.get(id))
+      .filter((p): p is Product => p !== undefined);
+    
+    // Add any products not in the saved order at the end
+    const unorderedProducts = products.filter(
+      p => !productDisplayOrder.includes(p.id)
+    );
+    
+    return [...ordered, ...unorderedProducts];
+  }, [products, productDisplayOrder, storeStudioEnabled]);
+
+  // Compute product lists using ordered products
   const { flashSalesProducts, bestSaleProducts, popularProducts, activeProducts } = useMemo(() => {
     const now = new Date();
-    const active = products.filter(p => p.status === 'Active' || !p.status);
+    const active = orderedProducts.filter(p => p.status === 'Active' || !p.status);
     
     const flash = active.filter(p => {
       if (!p.flashSale) return false;
@@ -148,33 +172,49 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
       popularProducts: popular,
       activeProducts: active 
     };
-  }, [products]);
+  }, [orderedProducts]);
 
-  // Fetch layout from backend
+  // Fetch store studio config and layout from backend
   useEffect(() => {
-    const fetchLayout = async () => {
+    const fetchLayoutAndConfig = async () => {
       if (!tenantId) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`/api/tenant-data/${tenantId}/store_layout`);
-        if (!response.ok) throw new Error('Failed to fetch layout');
-        
-        const result = await response.json();
-        if (result.data?.sections?.length > 0) {
-          setLayout(result.data);
+        // Fetch both store studio config and layout in parallel
+        const [configResponse, layoutResponse] = await Promise.all([
+          fetch(`/api/tenant-data/${tenantId}/store_studio_config`),
+          fetch(`/api/tenant-data/${tenantId}/store_layout`)
+        ]);
+
+        // Check if store studio is enabled
+        if (configResponse.ok) {
+          const configResult = await configResponse.json();
+          const isEnabled = configResult.data?.enabled || false;
+          const displayOrder = configResult.data?.productDisplayOrder || [];
+          
+          setStoreStudioEnabled(isEnabled);
+          setProductDisplayOrder(displayOrder);
+          
+          // Only use custom layout if store studio is enabled
+          if (isEnabled && layoutResponse.ok) {
+            const layoutResult = await layoutResponse.json();
+            if (layoutResult.data?.sections?.length > 0) {
+              setLayout(layoutResult.data);
+            }
+          }
         }
       } catch (e) {
-        console.warn('[StoreFrontRenderer] No custom layout found, using default');
-        setError('No custom layout');
+        console.warn('[StoreFrontRenderer] Error fetching config/layout:', e);
+        setError('Failed to load configuration');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchLayout();
+    fetchLayoutAndConfig();
   }, [tenantId]);
 
   // Get products filtered by tag
