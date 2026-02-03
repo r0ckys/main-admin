@@ -203,19 +203,92 @@ const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: str
   );
 };
 
+// Standalone Field Component (outside SectionSettings to prevent focus loss)
+const SettingsField: React.FC<{
+  label: string;
+  name: string;
+  value: any;
+  type?: string;
+  options?: { value: string; label: string }[];
+  onChange: (name: string, value: any) => void;
+}> = React.memo(({ label, name, value, type = 'text', options, onChange }) => {
+  const handleChange = (newVal: any) => onChange(name, newVal);
+  
+  const stopEvents = {
+    onClick: (e: React.MouseEvent) => e.stopPropagation(),
+    onMouseDown: (e: React.MouseEvent) => e.stopPropagation(),
+    onFocus: (e: React.FocusEvent) => e.stopPropagation(),
+    onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation(),
+  };
+  
+  if (type === 'select' && options) {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <select value={value || ''} onChange={(e) => handleChange(e.target.value)} {...stopEvents} className="w-full px-3 py-2 text-sm border rounded-lg">
+          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+    );
+  }
+  
+  if (type === 'checkbox') {
+    return (
+      <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
+        <input type="checkbox" checked={Boolean(value)} onChange={(e) => handleChange(e.target.checked)} {...stopEvents} className="rounded" />
+        {label}
+      </label>
+    );
+  }
+  
+  if (type === 'color') {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <div className="flex gap-2">
+          <input type="color" value={value || "#000000"} onChange={(e) => handleChange(e.target.value)} {...stopEvents} className="w-10 h-10 rounded cursor-pointer border-0" />
+          <input type="text" value={value || ''} onChange={(e) => handleChange(e.target.value)} {...stopEvents} className="flex-1 px-3 py-2 text-sm border rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+  
+  if (type === 'number') {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <input type="number" value={value || 0} onChange={(e) => handleChange(parseInt(e.target.value) || 0)} {...stopEvents} className="w-full px-3 py-2 text-sm border rounded-lg" />
+      </div>
+    );
+  }
+  
+  if (type === 'textarea') {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <textarea value={value || ''} onChange={(e) => handleChange(e.target.value)} {...stopEvents} rows={4} className="w-full px-3 py-2 text-sm border rounded-lg resize-none" />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="mb-3">
+      <label className="text-sm text-gray-700 block mb-1">{label}</label>
+      <input type={type} value={value || ''} onChange={(e) => handleChange(e.target.value)} {...stopEvents} className="w-full px-3 py-2 text-sm border rounded-lg" />
+    </div>
+  );
+});
+
 // SectionSettings Component
 const SectionSettings: React.FC<{ section: PlacedSection; onUpdate: (settings: Record<string, any>) => void }> = ({ section, onUpdate }) => {
-  const Field = ({ label, name, type = 'text', options }: { label: string; name: string; type?: string; options?: { value: string; label: string }[] }) => {
-    const value = section.settings[name];
-    const handleChange = (newVal: any) => onUpdate({ ...section.settings, [name]: newVal });
-    
-    if (type === 'select' && options) return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><select value={value} onChange={(e) => handleChange(e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onFocus={(e) => e.stopPropagation()} className="w-full px-3 py-2 text-sm border rounded-lg">{options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>;
-    if (type === 'checkbox') return <label className="flex items-center gap-2 text-sm text-gray-700 mb-3"><input type="checkbox" checked={Boolean(value)} onChange={(e) => handleChange(e.target.checked)} onClick={(e) => e.stopPropagation()} className="rounded" />{label}</label>;
-    if (type === 'color') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><div className="flex gap-2"><input type="color" value={value || "#000000"} onChange={(e) => handleChange(e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} className="w-10 h-10 rounded cursor-pointer border-0" /><input type="text" value={value} onChange={(e) => handleChange(e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onFocus={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="flex-1 px-3 py-2 text-sm border rounded-lg" /></div></div>;
-    if (type === 'number') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><input type="number" value={value} onChange={(e) => handleChange(parseInt(e.target.value) || 0)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onFocus={(e) => e.stopPropagation()} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>;
-    if (type === 'textarea') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><textarea value={value || ""} onChange={(e) => handleChange(e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onFocus={(e) => e.stopPropagation()} rows={4} className="w-full px-3 py-2 text-sm border rounded-lg resize-none" /></div>;
-    return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><input type={type} value={value || ''} onChange={(e) => handleChange(e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onFocus={(e) => e.stopPropagation()} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>;
-  };
+  const handleFieldChange = useCallback((name: string, value: any) => {
+    onUpdate({ ...section.settings, [name]: value });
+  }, [section.settings, onUpdate]);
+  
+  const Field = ({ label, name, type = 'text', options }: { label: string; name: string; type?: string; options?: { value: string; label: string }[] }) => (
+    <SettingsField label={label} name={name} value={section.settings[name]} type={type} options={options} onChange={handleFieldChange} />
+  );
+
   
   const renderFields = () => {
     switch (section.type) {
