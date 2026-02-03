@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { 
   Store, Settings, Eye, EyeOff, Save, ArrowLeft, Loader2, 
   CheckCircle2, AlertCircle, Palette, Layout, Grid, Move 
@@ -7,6 +7,9 @@ import toast from 'react-hot-toast';
 import { StoreStudioConfig, Product } from '../../types';
 import { DataService } from '../../services/DataService';
 import ProductOrderManager from './ProductOrderManager';
+
+// Lazy load PageBuilder for the Layout tab
+const PageBuilder = lazy(() => import('../PageBuilder').then(m => ({ default: m.PageBuilder })));
 
 interface StoreStudioManagerProps {
   tenantId: string;
@@ -369,17 +372,19 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
 
         {/* Layout Builder Tab */}
         {activeTab === 'layout' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-center py-12">
-              <Layout className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Layout Builder</h3>
-              <p className="text-gray-600 mb-4">
-                The visual layout builder will be loaded when you navigate to this section.
-              </p>
-              <p className="text-sm text-gray-500">
-                This will integrate with the existing PageBuilder component for drag-and-drop layout editing.
-              </p>
-            </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <Suspense 
+              fallback={
+                <div className="flex items-center justify-center p-12">
+                  <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading Layout Builder...</p>
+                  </div>
+                </div>
+              }
+            >
+              <PageBuilder tenantId={tenantId} />
+            </Suspense>
           </div>
         )}
 
