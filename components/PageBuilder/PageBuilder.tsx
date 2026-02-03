@@ -212,15 +212,113 @@ const SettingsField: React.FC<{
   type?: string;
   options?: { value: string; label: string }[];
   onChange: (name: string, value: any) => void;
-}> = React.memo(({ label, name, value, type = 'text', options, onChange }) => {
+  tenantId?: string;
+}> = React.memo(({ label, name, value, type = 'text', options, onChange, tenantId }) => {
   const handleChange = (newVal: any) => onChange(name, newVal);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = React.useState(false);
   
+  // Only stop propagation for click and mousedown to prevent selection issues
+  // Do NOT stop propagation for onFocus - it causes focus loss
   const stopEvents = {
     onClick: (e: React.MouseEvent) => e.stopPropagation(),
     onMouseDown: (e: React.MouseEvent) => e.stopPropagation(),
-    onFocus: (e: React.FocusEvent) => e.stopPropagation(),
-    onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation(),
   };
+  
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !tenantId) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      // Import the upload function dynamically
+      const { uploadPreparedImageToServer } = await import('../../services/imageUploadService');
+      const imageUrl = await uploadPreparedImageToServer(file, tenantId, 'gallery');
+      handleChange(imageUrl);
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+  
+  if (type === 'image' || type === 'imageUrl') {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <div className="space-y-2">
+          {value && (
+            <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
+              <img src={value} alt={label} className="w-full h-full object-cover" />
+              <button
+                onClick={(e) => { e.stopPropagation(); handleChange(''); }}
+                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                type="button"
+              >
+                <Icons.X />
+              </button>
+            </div>
+          )}
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder="Enter image URL or upload below"
+            {...stopEvents}
+            className="w-full px-3 py-2 text-sm border rounded-lg"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+              disabled={uploading || !tenantId}
+              className="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              type="button"
+            >
+              {uploading ? 'Uploading...' : 'Upload Image'}
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </div>
+      </div>
+    );
+  }
+  
+  if (type === 'video' || type === 'videoUrl') {
+    return (
+      <div className="mb-3">
+        <label className="text-sm text-gray-700 block mb-1">{label}</label>
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder="Enter YouTube or Vimeo URL"
+            {...stopEvents}
+            className="w-full px-3 py-2 text-sm border rounded-lg"
+          />
+          {value && (
+            <div className="text-xs text-gray-500 mt-1">
+              <p>✓ Video URL added</p>
+              <p className="truncate">{value}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
   
   if (type === 'select' && options) {
     return (
@@ -281,13 +379,13 @@ const SettingsField: React.FC<{
 });
 
 // SectionSettings Component
-const SectionSettings: React.FC<{ section: PlacedSection; onUpdate: (settings: Record<string, any>) => void }> = ({ section, onUpdate }) => {
+const SectionSettings: React.FC<{ section: PlacedSection; onUpdate: (settings: Record<string, any>) => void; tenantId: string }> = ({ section, onUpdate, tenantId }) => {
   const handleFieldChange = useCallback((name: string, value: any) => {
     onUpdate({ ...section.settings, [name]: value });
   }, [section.settings, onUpdate]);
   
   const Field = ({ label, name, type = 'text', options }: { label: string; name: string; type?: string; options?: { value: string; label: string }[] }) => (
-    <SettingsField label={label} name={name} value={section.settings[name]} type={type} options={options} onChange={handleFieldChange} />
+    <SettingsField label={label} name={name} value={section.settings[name]} type={type} options={options} onChange={handleFieldChange} tenantId={tenantId} />
   );
 
   
@@ -295,14 +393,16 @@ const SectionSettings: React.FC<{ section: PlacedSection; onUpdate: (settings: R
     switch (section.type) {
       case 'announcement-bar': return <><Field label="Text" name="text" /><Field label="Background Color" name="backgroundColor" type="color" /><Field label="Text Color" name="textColor" type="color" /><Field label="Dismissible" name="dismissible" type="checkbox" /></>;
       case 'header': return <><Field label="Logo Text" name="logoText" /><Field label="Sticky Header" name="sticky" type="checkbox" /><Field label="Transparent" name="transparent" type="checkbox" /></>;
-      case 'hero': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /><Field label="Height" name="height" type="select" options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} /></>;
+      case 'hero': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /><Field label="Image URL" name="imageUrl" type="image" /><Field label="Height" name="height" type="select" options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} /></>;
       case 'categories': return <><Field label="Title" name="title" /><Field label="Style" name="style" type="select" options={[{ value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' }, { value: 'list', label: 'List' }]} /><Field label="Columns" name="columns" type="number" /><Field label="Show Subcategories" name="showSubcategories" type="checkbox" /></>;
       case 'flash-sale': return <><Field label="Title" name="title" /><Field label="Show Countdown" name="showCountdown" type="checkbox" /><Field label="Products to Show" name="productsToShow" type="number" /></>;
       case 'product-grid': return <><Field label="Heading" name="heading" /><Field label="Products to Show" name="productsToShow" type="number" /><Field label="Columns" name="columns" type="select" options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }, { value: '5', label: '5' }]} /><Field label="Filter Type" name="filterType" type="select" options={[{ value: 'all', label: 'All Products' }, { value: 'featured', label: 'Featured Only' }, { value: 'bestseller', label: 'Best Sellers' }, { value: 'new', label: 'New Arrivals' }]} /></>;
       case 'brands': return <><Field label="Title" name="title" /><Field label="Style" name="style" type="select" options={[{ value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' }]} /><Field label="Grayscale" name="grayscale" type="checkbox" /></>;
       case 'newsletter': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Background Color" name="backgroundColor" type="color" /></>;
       case 'footer': return <><Field label="Copyright Text" name="copyrightText" /><Field label="Show Newsletter" name="showNewsletter" type="checkbox" /><Field label="Show Social Links" name="showSocial" type="checkbox" /></>;
-      case 'image-with-text': return <><Field label="Heading" name="heading" /><Field label="Text" name="text" type="textarea" /><Field label="Image Position" name="imagePosition" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }]} /><Field label="Button Text" name="buttonText" /></>;
+      case 'image-with-text': return <><Field label="Heading" name="heading" /><Field label="Text" name="text" type="textarea" /><Field label="Image URL" name="imageUrl" type="image" /><Field label="Image Position" name="imagePosition" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }]} /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /></>;
+      case 'image-banner': return <><Field label="Image URL" name="imageUrl" type="image" /><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /><Field label="Height" name="height" type="select" options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} /></>;
+      case 'video': return <><Field label="Video URL" name="videoUrl" type="video" /><Field label="Heading" name="heading" /><Field label="Autoplay" name="autoplay" type="checkbox" /><Field label="Muted" name="muted" type="checkbox" /><Field label="Loop" name="loop" type="checkbox" /></>;
       case 'testimonials': return <><Field label="Heading" name="heading" /><Field label="Show Ratings" name="showRatings" type="checkbox" /></>;
       case 'rich-text': return <><Field label="Content" name="content" type="textarea" /><Field label="Text Align" name="textAlign" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} /><Field label="Background Color" name="backgroundColor" type="color" /></>;
       default: return Object.keys(section.settings).map(key => <Field key={key} label={key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())} name={key} />);
@@ -785,8 +885,6 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
                           type="text"
                           onClick={(e) => e.stopPropagation()}
                           onMouseDown={(e) => e.stopPropagation()}
-                          onFocus={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
                           value={String(v)}
                           onChange={(e) => {
                             const newSettings = { ...selectedBlock.settings, [k]: e.target.value };
@@ -802,7 +900,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
                     ))}
                   </div>
                 ) : (
-                  <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} />
+                  <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} tenantId={tenantId} />
                 )}
               </div>
             </>
