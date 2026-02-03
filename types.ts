@@ -590,3 +590,32 @@ export interface OfferPage {
   publishedAt?: string;
 }
 
+// Store Studio Configuration Types
+export interface StoreStudioConfig {
+  tenantId: string;
+  enabled: boolean;
+  productDisplayOrder?: number[]; // Array of product IDs in display order
+  customLayout?: {
+    sections: any[];
+    version?: number;
+    publishedAt?: string;
+  };
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export interface ProductOrderItem {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  order: number;
+}
+
+export interface StoreStudioSettings {
+  enabled: boolean;
+  allowCustomLayouts: boolean;
+  allowProductReordering: boolean;
+  allowElementEditing: boolean;
+}
+

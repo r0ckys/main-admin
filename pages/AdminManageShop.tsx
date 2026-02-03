@@ -211,6 +211,18 @@ const AdminManageShop: React.FC<ManageShopProps> = ({ onNavigate, tenantId, webs
       status: 'active'
     },
     {
+      id: 'store-studio',
+      title: 'Store Studio',
+      titleBn: 'স্টোর স্টুডিও',
+      description: 'Design your store visually without code - customize layouts, colors, and product order',
+      descriptionBn: 'কোড ছাড়াই আপনার স্টোর ভিজ্যুয়ালি ডিজাইন করুন - লেআউট, রঙ এবং পণ্যের ক্রম কাস্টমাইজ করুন',
+      icon: <Palette size={24} />,
+      color: 'text-violet-600',
+      bgColor: 'bg-violet-50',
+      section: 'store_studio',
+      status: 'active'
+    },
+    {
       id: 'domain',
       title: 'Shop Domain',
       titleBn: 'শপ ডোমেইন',

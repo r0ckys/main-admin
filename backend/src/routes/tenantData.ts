@@ -231,3 +231,143 @@ tenantDataRouter.put('/:tenantId/:key', async (req, res, next) => {
     next(error);
   }
 });
+
+// Store Studio Configuration Endpoints
+
+// Get store studio configuration
+tenantDataRouter.get('/:tenantId/store_studio_config', async (req, res, next) => {
+  try {
+    const rawTenantId = req.params.tenantId;
+    if (!rawTenantId) {
+      return res.status(400).json({ error: 'tenantId is required' });
+    }
+    
+    const tenantId = await resolveTenantId(rawTenantId);
+    const config = await getTenantData(tenantId, 'store_studio_config');
+    
+    // Return default config if none exists
+    const defaultConfig = {
+      tenantId,
+      enabled: false,
+      productDisplayOrder: [],
+      customLayout: null,
+      updatedAt: new Date().toISOString()
+    };
+    
+    res.json({ data: config || defaultConfig });
+  } catch (error) {
+    console.error(`[TenantData] Error fetching store_studio_config:`, error);
+    next(error);
+  }
+});
+
+// Update store studio configuration (toggle, settings, etc.)
+tenantDataRouter.put('/:tenantId/store_studio_config', async (req, res, next) => {
+  try {
+    const rawTenantId = req.params.tenantId;
+    if (!rawTenantId) {
+      return res.status(400).json({ error: 'tenantId is required' });
+    }
+    
+    const tenantId = await resolveTenantId(rawTenantId);
+    const config = req.body;
+    
+    // Ensure tenantId is set correctly
+    config.tenantId = tenantId;
+    config.updatedAt = new Date().toISOString();
+    
+    // Get user info for audit
+    const user = (req as any).user;
+    if (user) {
+      config.updatedBy = user._id || user.id;
+    }
+    
+    await setTenantData(tenantId, 'store_studio_config', config);
+    
+    // Emit real-time update
+    emitDataUpdate(req, tenantId, 'store_studio_config', config);
+    
+    // Create audit log
+    await createAuditLog({
+      tenantId,
+      userId: user?._id || user?.id || 'system',
+      userName: user?.name || 'System',
+      userRole: user?.role || 'system',
+      action: 'Store Studio Config Updated',
+      actionType: 'update',
+      resourceType: 'settings',
+      resourceId: tenantId,
+      resourceName: 'store_studio_config',
+      details: `Store Studio ${config.enabled ? 'enabled' : 'disabled'}`,
+      metadata: { enabled: config.enabled },
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      status: 'success'
+    });
+    
+    res.json({ data: config, success: true });
+  } catch (error) {
+    console.error(`[TenantData] Error updating store_studio_config:`, error);
+    next(error);
+  }
+});
+
+// Update product display order
+tenantDataRouter.put('/:tenantId/product_display_order', async (req, res, next) => {
+  try {
+    const rawTenantId = req.params.tenantId;
+    if (!rawTenantId) {
+      return res.status(400).json({ error: 'tenantId is required' });
+    }
+    
+    const tenantId = await resolveTenantId(rawTenantId);
+    const { productDisplayOrder } = req.body;
+    
+    if (!Array.isArray(productDisplayOrder)) {
+      return res.status(400).json({ error: 'productDisplayOrder must be an array' });
+    }
+    
+    // Update the store studio config with new product order
+    const existingConfig = await getTenantData(tenantId, 'store_studio_config') || {
+      tenantId,
+      enabled: false,
+      updatedAt: new Date().toISOString()
+    };
+    
+    existingConfig.productDisplayOrder = productDisplayOrder;
+    existingConfig.updatedAt = new Date().toISOString();
+    
+    const user = (req as any).user;
+    if (user) {
+      existingConfig.updatedBy = user._id || user.id;
+    }
+    
+    await setTenantData(tenantId, 'store_studio_config', existingConfig);
+    
+    // Emit real-time update
+    emitDataUpdate(req, tenantId, 'store_studio_config', existingConfig);
+    
+    // Create audit log
+    await createAuditLog({
+      tenantId,
+      userId: user?._id || user?.id || 'system',
+      userName: user?.name || 'System',
+      userRole: user?.role || 'system',
+      action: 'Product Display Order Updated',
+      actionType: 'update',
+      resourceType: 'product',
+      resourceId: tenantId,
+      resourceName: 'product_display_order',
+      details: `Product display order updated (${productDisplayOrder.length} products)`,
+      metadata: { productCount: productDisplayOrder.length },
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      status: 'success'
+    });
+    
+    res.json({ data: existingConfig, success: true });
+  } catch (error) {
+    console.error(`[TenantData] Error updating product_display_order:`, error);
+    next(error);
+  }
+});
