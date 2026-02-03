@@ -33,3 +33,7 @@ export type { HeroSectionProps } from './HeroSection';
 export type { StoreFooterProps } from './StoreFooter';
 export type { ProductQuickViewModalProps } from './ProductQuickViewModal';
 export type { TrackOrderModalProps } from './TrackOrderModal';
+
+// StoreFrontRenderer - Dynamic storefront based on Page Builder layout
+export { StoreFrontRenderer } from './StoreFrontRenderer';
+

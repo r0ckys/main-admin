@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense, useCallback } from 'react';
+import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
 import type { Product, User, WebsiteConfig, Order, ProductVariantSelection } from '../types';
 
 // Custom hook with all business logic
@@ -36,6 +36,8 @@ const ProductQuickViewModal = lazy(() => import('../components/store/ProductQuic
 const TrackOrderModal = lazy(() => import('../components/store/TrackOrderModal').then(m => ({ default: m.TrackOrderModal })));
 const StoreCategoryProducts = lazy(() => import('../components/StoreCategoryProducts'));
 const SearchResultsSection = lazy(() => import('../components/store/SearchResultsSection').then(m => ({ default: m.SearchResultsSection })));
+// Dynamic storefront renderer for Page Builder layouts
+const StoreFrontRenderer = lazy(() => import('../components/store/StoreFrontRenderer').then(m => ({ default: m.StoreFrontRenderer })));
 
 interface StoreHomeProps {
   products?: Product[];
@@ -150,6 +152,35 @@ const StoreHome: React.FC<StoreHomeProps> = ({
     searchValue,
     onSearchChange
   });
+
+
+  // === CUSTOM LAYOUT STATE ===
+  const [useCustomLayout, setUseCustomLayout] = useState(false);
+  const [customLayoutLoading, setCustomLayoutLoading] = useState(true);
+
+  // Check if tenant has a custom layout saved
+  useEffect(() => {
+    const checkCustomLayout = async () => {
+      if (!tenantId) {
+        setCustomLayoutLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/tenant-data/${tenantId}/store_layout`);
+        if (res.ok) {
+          const result = await res.json();
+          if (result.data?.sections?.length > 0) {
+            setUseCustomLayout(true);
+            console.log("[StoreHome] Using custom layout from Page Builder");
+          }
+        }
+      } catch (e) {
+        console.log("[StoreHome] No custom layout, using default");
+      }
+      setCustomLayoutLoading(false);
+    };
+    checkCustomLayout();
+  }, [tenantId]);
 
   // === HANDLERS ===
   const selectInstantVariant = useCallback((product: Product): ProductVariantSelection => ({
@@ -286,6 +317,30 @@ const StoreHome: React.FC<StoreHomeProps> = ({
         </Suspense>
       )}
       
+      {/* Conditional: Custom Layout vs Default Layout */}
+      {useCustomLayout ? (
+        <Suspense fallback={<StoreHomeSkeleton />}>
+          <StoreFrontRenderer
+            tenantId={tenantId || ""}
+            products={products}
+            categories={categories}
+            subCategories={subCategories}
+            childCategories={childCategories}
+            brands={brands}
+            tags={tags}
+            websiteConfig={websiteConfig}
+            logo={logo}
+            onProductClick={onProductClick}
+            onBuyNow={handleBuyNow}
+            onQuickView={setQuickViewProduct}
+            onAddToCart={handleAddProductToCartFromCard}
+            onCategoryClick={handleCategoryClick}
+            onBrandClick={(slug) => handleCategoryClick(slug)}
+            onOpenChat={onOpenChat}
+          />
+        </Suspense>
+      ) : (
+        <>
       {/* Hero Section */}
       <section className="max-w-[1408px] mx-auto px-4 sm:px-6 lg:px-8 pt-3">
       <HeroSection carouselItems={websiteConfig?.carouselItems} websiteConfig={websiteConfig} />
@@ -475,6 +530,8 @@ const StoreHome: React.FC<StoreHomeProps> = ({
         <StoreFooter websiteConfig={websiteConfig} logo={logo} onOpenChat={onOpenChat} />
       </Suspense>
       
+        </>
+      )}
       {/* Popup */}
       {activePopup && (
         <Suspense fallback={null}>

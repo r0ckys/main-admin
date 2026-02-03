@@ -1,16 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DndContext, closestCenter, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
 
-type SectionType = 'announcement-bar' | 'header' | 'hero' | 'featured-collection' | 'rich-text' | 'image-with-text' | 'image-banner' | 'slideshow' | 'video' | 'newsletter' | 'collection-list' | 'product-grid' | 'testimonials' | 'contact-form' | 'map' | 'multicolumn' | 'collapsible-content' | 'custom-liquid' | 'footer' | 'featured-product' | 'blog-posts' | 'brand-list';
+// Types
+type SectionType = 'announcement-bar' | 'header' | 'hero' | 'featured-collection' | 'rich-text' | 'image-with-text' | 'image-banner' | 'slideshow' | 'video' | 'newsletter' | 'collection-list' | 'product-grid' | 'testimonials' | 'contact-form' | 'map' | 'multicolumn' | 'collapsible-content' | 'custom-html' | 'footer' | 'featured-product' | 'blog-posts' | 'brand-list' | 'flash-sale' | 'categories' | 'brands' | 'tags-products';
 type BlockType = 'heading' | 'text' | 'button' | 'image' | 'link' | 'product' | 'collection' | 'video' | 'icon' | 'price' | 'quantity' | 'divider';
 
 interface Block { id: string; type: BlockType; settings: Record<string, any>; }
 interface PlacedSection { id: string; type: SectionType; name: string; visible: boolean; settings: Record<string, any>; blocks: Block[]; }
 interface PageBuilderProps { tenantId: string; }
 
+// Icons
 const Icons = {
   Monitor: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="2"/><path d="M8 21h8M12 17v4" strokeWidth="2"/></svg>,
   Smartphone: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" strokeWidth="2"/><path d="M12 18h.01" strokeWidth="2" strokeLinecap="round"/></svg>,
@@ -43,27 +45,35 @@ const Icons = {
   Menu: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12" strokeWidth="2"/><line x1="3" y1="6" x2="21" y2="6" strokeWidth="2"/><line x1="3" y1="18" x2="21" y2="18" strokeWidth="2"/></svg>,
   ShoppingBag: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" strokeWidth="2"/><line x1="3" y1="6" x2="21" y2="6" strokeWidth="2"/><path d="M16 10a4 4 0 01-8 0" strokeWidth="2"/></svg>,
   FileText: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" strokeWidth="2"/><polyline points="14,2 14,8 20,8" strokeWidth="2"/><line x1="16" y1="13" x2="8" y2="13" strokeWidth="2"/><line x1="16" y1="17" x2="8" y2="17" strokeWidth="2"/></svg>,
+  Zap: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10" strokeWidth="2"/></svg>,
+  Tag: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" strokeWidth="2"/><line x1="7" y1="7" x2="7.01" y2="7" strokeWidth="2"/></svg>,
+  Check: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12" strokeWidth="2"/></svg>,
 };
 
+// Section definitions with proper settings for each type
 const SECTION_DEFINITIONS: Record<SectionType, { icon: JSX.Element; label: string; category: 'header' | 'sections' | 'footer'; description: string; allowedBlocks: BlockType[]; defaultSettings: Record<string, any> }> = {
   'announcement-bar': { icon: <Icons.Megaphone />, label: 'Announcement bar', category: 'header', description: 'Show important announcements', allowedBlocks: ['text', 'link'], defaultSettings: { text: 'Welcome! Free shipping on orders over $50', backgroundColor: '#1a1a2e', textColor: '#ffffff', dismissible: true } },
   'header': { icon: <Icons.Layout />, label: 'Header', category: 'header', description: 'Site header with navigation', allowedBlocks: ['link', 'image'], defaultSettings: { logoText: 'Store', sticky: true, transparent: false, menuStyle: 'horizontal' } },
   'hero': { icon: <Icons.Star />, label: 'Hero banner', category: 'sections', description: 'Full-width hero section', allowedBlocks: ['heading', 'text', 'button', 'image'], defaultSettings: { heading: 'Welcome to Our Store', subheading: 'Discover amazing products', buttonText: 'Shop Now', buttonLink: '/products', imageUrl: '', overlayOpacity: 40, height: 'large', alignment: 'center' } },
+  'categories': { icon: <Icons.Grid />, label: 'Categories', category: 'sections', description: 'Display product categories', allowedBlocks: [], defaultSettings: { title: 'Shop by Category', style: 'grid', columns: 4, showSubcategories: true } },
   'featured-collection': { icon: <Icons.Grid />, label: 'Featured collection', category: 'sections', description: 'Showcase products from collection', allowedBlocks: ['heading', 'product'], defaultSettings: { heading: 'Featured Products', collectionId: '', productsToShow: 4, columns: 4, showViewAll: true } },
+  'flash-sale': { icon: <Icons.Zap />, label: 'Flash Sale', category: 'sections', description: 'Show flash sale products with countdown', allowedBlocks: [], defaultSettings: { title: 'Flash Deals', showCountdown: true, productsToShow: 8 } },
+  'product-grid': { icon: <Icons.ShoppingBag />, label: 'Product grid', category: 'sections', description: 'Grid of products', allowedBlocks: ['product'], defaultSettings: { heading: 'All Products', productsToShow: 12, columns: 4, filterType: 'all', showFilters: false, showSort: false } },
+  'brands': { icon: <Icons.Star />, label: 'Brands Section', category: 'sections', description: 'Display brand logos', allowedBlocks: [], defaultSettings: { title: 'Our Brands', style: 'carousel', columns: 6, grayscale: false } },
+  'tags-products': { icon: <Icons.Tag />, label: 'Products by Tag', category: 'sections', description: 'Show products filtered by tag', allowedBlocks: [], defaultSettings: { tagName: '', title: 'Tagged Products', productsToShow: 8, columns: 4 } },
   'rich-text': { icon: <Icons.Type />, label: 'Rich text', category: 'sections', description: 'Custom formatted text content', allowedBlocks: ['heading', 'text', 'button'], defaultSettings: { content: 'Add your content here...', textAlign: 'center', backgroundColor: '#ffffff', maxWidth: '800px' } },
-  'image-with-text': { icon: <Icons.Image />, label: 'Image with text', category: 'sections', description: 'Image paired with text content', allowedBlocks: ['heading', 'text', 'button', 'image'], defaultSettings: { heading: 'Section Title', text: 'Pair text with an image to focus on your chosen product, collection, or blog post.', imagePosition: 'left', buttonText: 'Learn More', buttonLink: '' } },
+  'image-with-text': { icon: <Icons.Image />, label: 'Image with text', category: 'sections', description: 'Image paired with text content', allowedBlocks: ['heading', 'text', 'button', 'image'], defaultSettings: { heading: 'Section Title', text: 'Pair text with an image to focus on your chosen product, collection, or blog post.', imagePosition: 'left', buttonText: 'Learn More', buttonLink: '', imageUrl: '' } },
   'image-banner': { icon: <Icons.Image />, label: 'Image banner', category: 'sections', description: 'Full-width image banner', allowedBlocks: ['heading', 'text', 'button'], defaultSettings: { imageUrl: '', heading: '', subheading: '', buttonText: '', buttonLink: '', height: 'medium', overlayOpacity: 30 } },
-  'slideshow': { icon: <Icons.Layers />, label: 'Slideshow', category: 'sections', description: 'Image carousel/slideshow', allowedBlocks: ['image'], defaultSettings: { autoplay: true, autoplaySpeed: 5, showArrows: true, showDots: true } },
+  'slideshow': { icon: <Icons.Layers />, label: 'Slideshow', category: 'sections', description: 'Image carousel/slideshow', allowedBlocks: ['image'], defaultSettings: { autoplay: true, autoplaySpeed: 5, showArrows: true, showDots: true, slides: [] } },
   'video': { icon: <Icons.Video />, label: 'Video', category: 'sections', description: 'Embed video content', allowedBlocks: ['heading', 'text'], defaultSettings: { videoUrl: '', autoplay: false, muted: true, loop: true, aspectRatio: '16:9', heading: '' } },
   'newsletter': { icon: <Icons.Mail />, label: 'Newsletter', category: 'sections', description: 'Email signup form', allowedBlocks: ['heading', 'text'], defaultSettings: { heading: 'Subscribe to our newsletter', subheading: 'Get the latest updates and offers.', buttonText: 'Subscribe', backgroundColor: '#f8f9fa', successMessage: 'Thanks for subscribing!' } },
-  'collection-list': { icon: <Icons.Grid />, label: 'Collection list', category: 'sections', description: 'Display collections', allowedBlocks: ['collection'], defaultSettings: { heading: 'Shop by Category', collections: [], columns: 3, imageRatio: 'square' } },
-  'product-grid': { icon: <Icons.ShoppingBag />, label: 'Product grid', category: 'sections', description: 'Grid of products', allowedBlocks: ['product'], defaultSettings: { heading: 'All Products', productsPerRow: 4, rows: 2, showFilters: true, showSort: true } },
-  'testimonials': { icon: <Icons.Message />, label: 'Testimonials', category: 'sections', description: 'Customer reviews/testimonials', allowedBlocks: ['text'], defaultSettings: { heading: 'What Our Customers Say', testimonials: [], autoplay: true, showRatings: true } },
+  'collection-list': { icon: <Icons.Grid />, label: 'Collection list', category: 'sections', description: 'Display collections', allowedBlocks: ['collection'], defaultSettings: { heading: 'Shop by Category', columns: 3, imageRatio: 'square' } },
+  'testimonials': { icon: <Icons.Message />, label: 'Testimonials', category: 'sections', description: 'Customer reviews/testimonials', allowedBlocks: ['text'], defaultSettings: { heading: 'What Our Customers Say', items: [], autoplay: true, showRatings: true } },
   'contact-form': { icon: <Icons.Mail />, label: 'Contact form', category: 'sections', description: 'Contact form section', allowedBlocks: ['heading', 'text'], defaultSettings: { heading: 'Get in Touch', subheading: 'Have a question? Send us a message.', showPhone: true, showAddress: true, formFields: ['name', 'email', 'message'] } },
   'map': { icon: <Icons.Map />, label: 'Map', category: 'sections', description: 'Embed Google map', allowedBlocks: ['heading', 'text'], defaultSettings: { address: '', heading: 'Visit Us', mapHeight: 400, showMarker: true } },
   'multicolumn': { icon: <Icons.Grid />, label: 'Multicolumn', category: 'sections', description: 'Multi-column content', allowedBlocks: ['heading', 'text', 'image', 'button'], defaultSettings: { heading: '', columns: 3, columnContent: [] } },
   'collapsible-content': { icon: <Icons.Menu />, label: 'Collapsible content', category: 'sections', description: 'FAQ/accordion content', allowedBlocks: ['heading', 'text'], defaultSettings: { heading: 'Frequently Asked Questions', items: [], openFirst: true, allowMultiple: false } },
-  'custom-liquid': { icon: <Icons.FileText />, label: 'Custom HTML', category: 'sections', description: 'Custom HTML/liquid code', allowedBlocks: [], defaultSettings: { html: '' } },
+  'custom-html': { icon: <Icons.FileText />, label: 'Custom HTML', category: 'sections', description: 'Custom HTML code', allowedBlocks: [], defaultSettings: { html: '' } },
   'footer': { icon: <Icons.Layout />, label: 'Footer', category: 'footer', description: 'Site footer', allowedBlocks: ['link', 'text', 'image'], defaultSettings: { showNewsletter: true, showSocial: true, showPaymentIcons: true, copyrightText: '© 2024 Store. All rights reserved.', columns: 4 } },
   'featured-product': { icon: <Icons.Star />, label: 'Featured product', category: 'sections', description: 'Highlight a single product', allowedBlocks: ['heading', 'text', 'button', 'price'], defaultSettings: { productId: '', showQuantity: true, showVariants: true, mediaSize: 'medium' } },
   'blog-posts': { icon: <Icons.FileText />, label: 'Blog posts', category: 'sections', description: 'Display blog posts', allowedBlocks: ['heading'], defaultSettings: { heading: 'Latest Posts', postsToShow: 3, showDate: true, showAuthor: true, showExcerpt: true } },
@@ -85,10 +95,37 @@ const BLOCK_DEFINITIONS: Record<BlockType, { icon: JSX.Element; label: string; d
   'divider': { icon: <Icons.Menu />, label: 'Divider', defaultSettings: { style: 'line', spacing: 'medium' } }
 };
 
-const SortableSectionItem: React.FC<{ section: PlacedSection; isSelected: boolean; isExpanded: boolean; selectedBlockId: string | null; onSelect: () => void; onToggleExpand: () => void; onToggleVisibility: () => void; onDelete: () => void; onSelectBlock: (blockId: string) => void; onAddBlock: () => void }> = ({ section, isSelected, isExpanded, selectedBlockId, onSelect, onToggleExpand, onToggleVisibility, onDelete, onSelectBlock, onAddBlock }) => {
+// Default store layout template
+const getDefaultLayout = (): PlacedSection[] => [
+  { id: uuidv4(), type: 'announcement-bar', name: 'Announcement bar', visible: true, settings: SECTION_DEFINITIONS['announcement-bar'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'header', name: 'Header', visible: true, settings: SECTION_DEFINITIONS['header'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'hero', name: 'Hero banner', visible: true, settings: SECTION_DEFINITIONS['hero'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'categories', name: 'Categories', visible: true, settings: SECTION_DEFINITIONS['categories'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'flash-sale', name: 'Flash Sale', visible: true, settings: SECTION_DEFINITIONS['flash-sale'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'product-grid', name: 'Featured Products', visible: true, settings: { ...SECTION_DEFINITIONS['product-grid'].defaultSettings, heading: 'Featured Products', filterType: 'featured' }, blocks: [] },
+  { id: uuidv4(), type: 'brands', name: 'Brands', visible: true, settings: SECTION_DEFINITIONS['brands'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'product-grid', name: 'All Products', visible: true, settings: { ...SECTION_DEFINITIONS['product-grid'].defaultSettings, heading: 'Our Products', filterType: 'all', productsToShow: 20 }, blocks: [] },
+  { id: uuidv4(), type: 'newsletter', name: 'Newsletter', visible: true, settings: SECTION_DEFINITIONS['newsletter'].defaultSettings, blocks: [] },
+  { id: uuidv4(), type: 'footer', name: 'Footer', visible: true, settings: SECTION_DEFINITIONS['footer'].defaultSettings, blocks: [] }
+];
+
+// SortableSectionItem Component
+const SortableSectionItem: React.FC<{ 
+  section: PlacedSection; 
+  isSelected: boolean; 
+  isExpanded: boolean; 
+  selectedBlockId: string | null; 
+  onSelect: () => void; 
+  onToggleExpand: () => void; 
+  onToggleVisibility: () => void; 
+  onDelete: () => void; 
+  onSelectBlock: (blockId: string) => void; 
+  onAddBlock: () => void 
+}> = ({ section, isSelected, isExpanded, selectedBlockId, onSelect, onToggleExpand, onToggleVisibility, onDelete, onSelectBlock, onAddBlock }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const def = SECTION_DEFINITIONS[section.type];
+  
   return (
     <div ref={setNodeRef} style={style} className="group">
       <div className={`flex items-center gap-1 px-2 py-1.5 rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'} ${!section.visible ? 'opacity-50' : ''}`} onClick={onSelect}>
@@ -117,6 +154,7 @@ const SortableSectionItem: React.FC<{ section: PlacedSection; isSelected: boolea
   );
 };
 
+// StorePreview Component
 const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: string | null; devicePreview: 'desktop' | 'tablet' | 'mobile'; onSelectSection: (id: string) => void }> = ({ sections, selectedSectionId, devicePreview, onSelectSection }) => {
   const deviceWidths = { desktop: '100%', tablet: '768px', mobile: '375px' };
   const visibleSections = sections.filter(s => s.visible);
@@ -129,31 +167,35 @@ const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: str
       case 'announcement-bar':
         return <div className={`${baseClass} py-2 px-4 text-center text-sm`} style={{ backgroundColor: section.settings.backgroundColor, color: section.settings.textColor }}>{section.settings.text}</div>;
       case 'header':
-        return <div className={`${baseClass} flex items-center justify-between px-6 py-4 bg-white border-b`}><div className="text-xl font-bold">{section.settings.logoText}</div><div className="flex gap-6"><span className="text-gray-600 hover:text-gray-900">Shop</span><span className="text-gray-600 hover:text-gray-900">About</span><span className="text-gray-600 hover:text-gray-900">Contact</span></div><div className="flex gap-4"><Icons.Search /><Icons.ShoppingBag /></div></div>;
+        return <div className={`${baseClass} flex items-center justify-between px-6 py-4 bg-white border-b`}><div className="text-xl font-bold">{section.settings.logoText}</div><div className="flex gap-6 text-sm"><span className="text-gray-600">Shop</span><span className="text-gray-600">About</span><span className="text-gray-600">Contact</span></div><div className="flex gap-4"><Icons.Search /><Icons.ShoppingBag /></div></div>;
       case 'hero':
-        return <div className={`${baseClass} relative ${section.settings.height === 'large' ? 'min-h-[500px]' : section.settings.height === 'medium' ? 'min-h-[400px]' : 'min-h-[300px]'} flex items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900 text-white`}><div className={`text-center px-8 ${section.settings.alignment === 'left' ? 'text-left' : section.settings.alignment === 'right' ? 'text-right' : 'text-center'}`}><h1 className="text-4xl font-bold mb-4">{section.settings.heading}</h1><p className="text-xl text-gray-300 mb-6">{section.settings.subheading}</p>{section.settings.buttonText && <button className="px-6 py-3 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100">{section.settings.buttonText}</button>}</div></div>;
-      case 'featured-collection':
-        return <div className={`${baseClass} py-12 px-6`}><h2 className="text-2xl font-bold text-center mb-8">{section.settings.heading}</h2><div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${section.settings.columns}, 1fr)` }}>{[1, 2, 3, 4].slice(0, section.settings.productsToShow).map(i => <div key={i} className="bg-gray-100 rounded-lg p-4"><div className="bg-gray-200 aspect-square rounded-lg mb-3" /><div className="h-4 bg-gray-200 rounded w-3/4 mb-2" /><div className="h-4 bg-gray-200 rounded w-1/2" /></div>)}</div></div>;
-      case 'rich-text':
-        return <div className={`${baseClass} py-12 px-6`} style={{ backgroundColor: section.settings.backgroundColor, textAlign: section.settings.textAlign as any }}><div className="max-w-3xl mx-auto prose">{section.settings.content}</div></div>;
+        return <div className={`${baseClass} relative ${section.settings.height === 'large' ? 'min-h-[400px]' : section.settings.height === 'medium' ? 'min-h-[300px]' : 'min-h-[200px]'} flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white`}><div className="text-center px-8"><h1 className="text-3xl font-bold mb-3">{section.settings.heading}</h1><p className="text-lg text-white/80 mb-4">{section.settings.subheading}</p>{section.settings.buttonText && <button className="px-6 py-2 bg-white text-purple-600 rounded-lg font-medium">{section.settings.buttonText}</button>}</div></div>;
+      case 'categories':
+        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-xl font-bold text-center mb-6">{section.settings.title}</h2><div className="grid grid-cols-4 gap-4">{[1,2,3,4].map(i => <div key={i} className="bg-gray-100 rounded-lg p-4 text-center"><div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2" /><span className="text-sm font-medium">Category {i}</span></div>)}</div></div>;
+      case 'flash-sale':
+        return <div className={`${baseClass} py-8 px-6 bg-gradient-to-r from-red-500 to-orange-500`}><div className="flex items-center justify-between mb-4"><h2 className="text-xl font-bold text-white">{section.settings.title}</h2>{section.settings.showCountdown && <div className="text-white text-sm">⏰ 23:59:59</div>}</div><div className="grid grid-cols-4 gap-3">{[1,2,3,4].map(i => <div key={i} className="bg-white rounded-lg p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-3 bg-gray-100 rounded w-1/2" /></div>)}</div></div>;
+      case 'product-grid':
+        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-xl font-bold mb-6">{section.settings.heading}</h2><div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${section.settings.columns}, 1fr)` }}>{Array(section.settings.productsToShow > 8 ? 8 : section.settings.productsToShow).fill(0).map((_, i) => <div key={i} className="bg-gray-50 rounded-lg p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-3 bg-gray-200 rounded w-1/2" /></div>)}</div></div>;
+      case 'brands':
+        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-lg font-bold text-center mb-6">{section.settings.title}</h2><div className="flex justify-center gap-8">{[1,2,3,4,5,6].map(i => <div key={i} className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">Brand {i}</div>)}</div></div>;
       case 'newsletter':
-        return <div className={`${baseClass} py-12 px-6 text-center`} style={{ backgroundColor: section.settings.backgroundColor }}><h2 className="text-2xl font-bold mb-2">{section.settings.heading}</h2><p className="text-gray-600 mb-6">{section.settings.subheading}</p><div className="flex max-w-md mx-auto"><input className="flex-1 px-4 py-2 border rounded-l-lg" placeholder="Enter your email" /><button className="px-6 py-2 bg-gray-900 text-white rounded-r-lg">{section.settings.buttonText}</button></div></div>;
+        return <div className={`${baseClass} py-10 px-6 text-center`} style={{ backgroundColor: section.settings.backgroundColor }}><h2 className="text-xl font-bold mb-2">{section.settings.heading}</h2><p className="text-gray-600 mb-4 text-sm">{section.settings.subheading}</p><div className="flex max-w-md mx-auto"><input className="flex-1 px-4 py-2 border rounded-l-lg text-sm" placeholder="Enter your email" /><button className="px-4 py-2 bg-gray-900 text-white rounded-r-lg text-sm">{section.settings.buttonText}</button></div></div>;
       case 'footer':
-        return <div className={`${baseClass} py-12 px-6 bg-gray-900 text-white`}><div className="grid grid-cols-4 gap-8 mb-8">{[1, 2, 3, 4].map(i => <div key={i}><div className="h-4 bg-gray-700 rounded w-1/2 mb-4" /><div className="space-y-2">{[1, 2, 3].map(j => <div key={j} className="h-3 bg-gray-700 rounded w-3/4" />)}</div></div>)}</div><div className="text-center text-gray-400 text-sm pt-8 border-t border-gray-800">{section.settings.copyrightText}</div></div>;
+        return <div className={`${baseClass} py-10 px-6 bg-gray-900 text-white`}><div className="grid grid-cols-4 gap-6 mb-6">{[1,2,3,4].map(i => <div key={i}><div className="h-4 bg-gray-700 rounded w-1/2 mb-3" /><div className="space-y-2">{[1,2,3].map(j => <div key={j} className="h-3 bg-gray-700 rounded w-3/4" />)}</div></div>)}</div><div className="text-center text-gray-400 text-sm pt-6 border-t border-gray-800">{section.settings.copyrightText}</div></div>;
       case 'image-with-text':
-        return <div className={`${baseClass} py-12 px-6`}><div className={`flex gap-8 items-center ${section.settings.imagePosition === 'right' ? 'flex-row-reverse' : ''}`}><div className="flex-1 bg-gray-200 aspect-video rounded-lg" /><div className="flex-1"><h2 className="text-2xl font-bold mb-4">{section.settings.heading}</h2><p className="text-gray-600 mb-4">{section.settings.text}</p>{section.settings.buttonText && <button className="px-4 py-2 border border-gray-900 rounded-lg">{section.settings.buttonText}</button>}</div></div></div>;
+        return <div className={`${baseClass} py-8 px-6`}><div className={`flex gap-8 items-center ${section.settings.imagePosition === 'right' ? 'flex-row-reverse' : ''}`}><div className="flex-1 bg-gray-200 aspect-video rounded-lg" /><div className="flex-1"><h2 className="text-xl font-bold mb-3">{section.settings.heading}</h2><p className="text-gray-600 text-sm mb-4">{section.settings.text}</p>{section.settings.buttonText && <button className="px-4 py-2 border border-gray-900 rounded-lg text-sm">{section.settings.buttonText}</button>}</div></div></div>;
       case 'testimonials':
-        return <div className={`${baseClass} py-12 px-6 bg-gray-50`}><h2 className="text-2xl font-bold text-center mb-8">{section.settings.heading}</h2><div className="grid grid-cols-3 gap-6">{[1, 2, 3].map(i => <div key={i} className="bg-white p-6 rounded-lg shadow-sm"><div className="flex gap-1 text-yellow-400 mb-4">{[1, 2, 3, 4, 5].map(s => <Icons.Star key={s} />)}</div><p className="text-gray-600 mb-4">"Amazing product! Highly recommended."</p><div className="flex items-center gap-3"><div className="w-10 h-10 bg-gray-200 rounded-full" /><div><div className="font-medium">Customer</div><div className="text-sm text-gray-500">Verified Buyer</div></div></div></div>)}</div></div>;
-      case 'collection-list':
-        return <div className={`${baseClass} py-12 px-6`}><h2 className="text-2xl font-bold text-center mb-8">{section.settings.heading}</h2><div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${section.settings.columns}, 1fr)` }}>{[1, 2, 3].map(i => <div key={i} className="relative group"><div className="bg-gray-200 aspect-square rounded-lg" /><div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg"><span className="text-white font-bold text-xl">Collection {i}</span></div></div>)}</div></div>;
+        return <div className={`${baseClass} py-8 px-6 bg-gray-50`}><h2 className="text-xl font-bold text-center mb-6">{section.settings.heading}</h2><div className="grid grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="bg-white p-4 rounded-lg shadow-sm"><div className="flex gap-1 text-yellow-400 mb-3">{[1,2,3,4,5].map(s => <Icons.Star key={s} />)}</div><p className="text-gray-600 text-sm mb-3">"Amazing product!"</p><div className="flex items-center gap-2"><div className="w-8 h-8 bg-gray-200 rounded-full" /><span className="text-sm font-medium">Customer</span></div></div>)}</div></div>;
+      case 'rich-text':
+        return <div className={`${baseClass} py-8 px-6`} style={{ backgroundColor: section.settings.backgroundColor, textAlign: section.settings.textAlign as any }}><div className="max-w-2xl mx-auto text-gray-700">{section.settings.content}</div></div>;
       default:
-        return <div className={`${baseClass} py-12 px-6 bg-gray-50 text-center`}><div className="text-gray-400">{SECTION_DEFINITIONS[section.type]?.icon}</div><p className="text-gray-500 mt-2">{section.name}</p></div>;
+        return <div className={`${baseClass} py-8 px-6 bg-gray-50 text-center`}><div className="text-gray-400">{SECTION_DEFINITIONS[section.type]?.icon}</div><p className="text-gray-500 mt-2 text-sm">{section.name}</p></div>;
     }
   };
   
   return (
-    <main className="flex-1 bg-gray-100 overflow-auto p-6">
-      <div className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all" style={{ maxWidth: deviceWidths[devicePreview], minHeight: 'calc(100vh - 120px)' }}>
+    <main className="flex-1 bg-gray-100 overflow-auto p-4">
+      <div className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all" style={{ maxWidth: deviceWidths[devicePreview], minHeight: 'calc(100vh - 140px)' }}>
         {visibleSections.map(section => <div key={section.id} onClick={() => onSelectSection(section.id)}>{renderSection(section)}</div>)}
         {visibleSections.length === 0 && <div className="flex flex-col items-center justify-center h-96 text-gray-400"><Icons.Layers /><p className="mt-4">Add sections to build your page</p></div>}
       </div>
@@ -161,45 +203,54 @@ const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: str
   );
 };
 
+// SectionSettings Component
 const SectionSettings: React.FC<{ section: PlacedSection; onUpdate: (settings: Record<string, any>) => void }> = ({ section, onUpdate }) => {
   const Field = ({ label, name, type = 'text', options }: { label: string; name: string; type?: string; options?: { value: string; label: string }[] }) => {
     const value = section.settings[name];
     const handleChange = (newVal: any) => onUpdate({ ...section.settings, [name]: newVal });
-    if (type === 'select' && options) return <div><label className="text-sm text-gray-700 block mb-1">{label}</label><select value={value} onChange={(e) => handleChange(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg">{options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>;
-    if (type === 'checkbox') return <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={Boolean(value)} onChange={(e) => handleChange(e.target.checked)} className="rounded" />{label}</label>;
-    if (type === 'color') return <div><label className="text-sm text-gray-700 block mb-1">{label}</label><input type="color" value={value} onChange={(e) => handleChange(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" /></div>;
-    if (type === 'range') return <div><label className="text-sm text-gray-700 block mb-1">{label}: {value}</label><input type="range" min="0" max="100" value={value} onChange={(e) => handleChange(parseInt(e.target.value))} className="w-full" /></div>;
-    if (type === 'textarea') return <div><label className="text-sm text-gray-700 block mb-1">{label}</label><textarea value={value} onChange={(e) => handleChange(e.target.value)} rows={4} className="w-full px-3 py-2 text-sm border rounded-lg resize-none" /></div>;
-    return <div><label className="text-sm text-gray-700 block mb-1">{label}</label><input type={type} value={value || ''} onChange={(e) => handleChange(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>;
+    
+    if (type === 'select' && options) return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><select value={value} onChange={(e) => handleChange(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg">{options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>;
+    if (type === 'checkbox') return <label className="flex items-center gap-2 text-sm text-gray-700 mb-3"><input type="checkbox" checked={Boolean(value)} onChange={(e) => handleChange(e.target.checked)} className="rounded" />{label}</label>;
+    if (type === 'color') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><div className="flex gap-2"><input type="color" value={value} onChange={(e) => handleChange(e.target.value)} className="w-10 h-10 rounded cursor-pointer border-0" /><input type="text" value={value} onChange={(e) => handleChange(e.target.value)} className="flex-1 px-3 py-2 text-sm border rounded-lg" /></div></div>;
+    if (type === 'number') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><input type="number" value={value} onChange={(e) => handleChange(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>;
+    if (type === 'textarea') return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><textarea value={value} onChange={(e) => handleChange(e.target.value)} rows={4} className="w-full px-3 py-2 text-sm border rounded-lg resize-none" /></div>;
+    return <div className="mb-3"><label className="text-sm text-gray-700 block mb-1">{label}</label><input type={type} value={value || ''} onChange={(e) => handleChange(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>;
   };
   
   const renderFields = () => {
     switch (section.type) {
       case 'announcement-bar': return <><Field label="Text" name="text" /><Field label="Background Color" name="backgroundColor" type="color" /><Field label="Text Color" name="textColor" type="color" /><Field label="Dismissible" name="dismissible" type="checkbox" /></>;
-      case 'header': return <><Field label="Logo Text" name="logoText" /><Field label="Sticky Header" name="sticky" type="checkbox" /><Field label="Transparent" name="transparent" type="checkbox" /><Field label="Menu Style" name="menuStyle" type="select" options={[{ value: 'horizontal', label: 'Horizontal' }, { value: 'dropdown', label: 'Dropdown' }]} /></>;
-      case 'hero': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /><Field label="Height" name="height" type="select" options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} /><Field label="Overlay Opacity" name="overlayOpacity" type="range" /><Field label="Alignment" name="alignment" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} /></>;
-      case 'featured-collection': return <><Field label="Heading" name="heading" /><Field label="Products to Show" name="productsToShow" type="select" options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }, { value: '6', label: '6' }]} /><Field label="Columns" name="columns" type="select" options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }]} /><Field label="Show View All" name="showViewAll" type="checkbox" /></>;
-      case 'rich-text': return <><Field label="Content" name="content" type="textarea" /><Field label="Text Align" name="textAlign" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} /><Field label="Background Color" name="backgroundColor" type="color" /></>;
+      case 'header': return <><Field label="Logo Text" name="logoText" /><Field label="Sticky Header" name="sticky" type="checkbox" /><Field label="Transparent" name="transparent" type="checkbox" /></>;
+      case 'hero': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Button Link" name="buttonLink" /><Field label="Height" name="height" type="select" options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} /></>;
+      case 'categories': return <><Field label="Title" name="title" /><Field label="Style" name="style" type="select" options={[{ value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' }, { value: 'list', label: 'List' }]} /><Field label="Columns" name="columns" type="number" /><Field label="Show Subcategories" name="showSubcategories" type="checkbox" /></>;
+      case 'flash-sale': return <><Field label="Title" name="title" /><Field label="Show Countdown" name="showCountdown" type="checkbox" /><Field label="Products to Show" name="productsToShow" type="number" /></>;
+      case 'product-grid': return <><Field label="Heading" name="heading" /><Field label="Products to Show" name="productsToShow" type="number" /><Field label="Columns" name="columns" type="select" options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }, { value: '5', label: '5' }]} /><Field label="Filter Type" name="filterType" type="select" options={[{ value: 'all', label: 'All Products' }, { value: 'featured', label: 'Featured Only' }, { value: 'bestseller', label: 'Best Sellers' }, { value: 'new', label: 'New Arrivals' }]} /></>;
+      case 'brands': return <><Field label="Title" name="title" /><Field label="Style" name="style" type="select" options={[{ value: 'grid', label: 'Grid' }, { value: 'carousel', label: 'Carousel' }]} /><Field label="Grayscale" name="grayscale" type="checkbox" /></>;
       case 'newsletter': return <><Field label="Heading" name="heading" /><Field label="Subheading" name="subheading" /><Field label="Button Text" name="buttonText" /><Field label="Background Color" name="backgroundColor" type="color" /></>;
-      case 'footer': return <><Field label="Copyright Text" name="copyrightText" /><Field label="Show Newsletter" name="showNewsletter" type="checkbox" /><Field label="Show Social Links" name="showSocial" type="checkbox" /><Field label="Show Payment Icons" name="showPaymentIcons" type="checkbox" /></>;
+      case 'footer': return <><Field label="Copyright Text" name="copyrightText" /><Field label="Show Newsletter" name="showNewsletter" type="checkbox" /><Field label="Show Social Links" name="showSocial" type="checkbox" /></>;
       case 'image-with-text': return <><Field label="Heading" name="heading" /><Field label="Text" name="text" type="textarea" /><Field label="Image Position" name="imagePosition" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }]} /><Field label="Button Text" name="buttonText" /></>;
-      case 'testimonials': return <><Field label="Heading" name="heading" /><Field label="Autoplay" name="autoplay" type="checkbox" /><Field label="Show Ratings" name="showRatings" type="checkbox" /></>;
-      case 'collection-list': return <><Field label="Heading" name="heading" /><Field label="Columns" name="columns" type="select" options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }]} /></>;
+      case 'testimonials': return <><Field label="Heading" name="heading" /><Field label="Show Ratings" name="showRatings" type="checkbox" /></>;
+      case 'rich-text': return <><Field label="Content" name="content" type="textarea" /><Field label="Text Align" name="textAlign" type="select" options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} /><Field label="Background Color" name="backgroundColor" type="color" /></>;
       default: return Object.keys(section.settings).map(key => <Field key={key} label={key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())} name={key} />);
     }
   };
-  return <div className="space-y-4">{renderFields()}</div>;
+  
+  return <div>{renderFields()}</div>;
 };
 
+// AddSectionModal Component
 const AddSectionModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (type: SectionType) => void; category: 'header' | 'sections' | 'footer' }> = ({ isOpen, onClose, onAdd, category }) => {
   const [search, setSearch] = useState('');
   if (!isOpen) return null;
-  const filteredSections = (Object.entries(SECTION_DEFINITIONS) as [SectionType, typeof SECTION_DEFINITIONS[SectionType]][]).filter(([type, def]) => (category === 'sections' ? def.category === 'sections' : def.category === category) && (def.label.toLowerCase().includes(search.toLowerCase()) || def.description.toLowerCase().includes(search.toLowerCase())));
+  
+  const filteredSections = (Object.entries(SECTION_DEFINITIONS) as [SectionType, typeof SECTION_DEFINITIONS[SectionType]][])
+    .filter(([type, def]) => (category === 'sections' ? def.category === 'sections' : def.category === category) && (def.label.toLowerCase().includes(search.toLowerCase()) || def.description.toLowerCase().includes(search.toLowerCase())));
+  
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b flex items-center justify-between"><h2 className="text-lg font-semibold">Add section</h2><button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Icons.X /></button></div>
-        <div className="p-4 border-b"><div className="relative"><Icons.Search /><input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search sections..." className="w-full pl-10 pr-4 py-2 border rounded-lg" style={{ paddingLeft: '2.5rem' }} /></div></div>
+        <div className="p-4 border-b"><div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icons.Search /></div><input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search sections..." className="w-full pl-10 pr-4 py-2 border rounded-lg" /></div></div>
         <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-3">
           {filteredSections.map(([type, def]) => (
             <button key={type} onClick={() => { onAdd(type); onClose(); }} className="flex items-start gap-3 p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left transition-all">
@@ -213,11 +264,12 @@ const AddSectionModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (
   );
 };
 
+// AddBlockModal Component
 const AddBlockModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (type: BlockType) => void; allowedBlocks: BlockType[] }> = ({ isOpen, onClose, onAdd, allowedBlocks }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-[400px]">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-[400px]" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b flex items-center justify-between"><h2 className="text-lg font-semibold">Add block</h2><button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Icons.X /></button></div>
         <div className="p-4 grid grid-cols-2 gap-2">
           {allowedBlocks.map(type => {
@@ -230,6 +282,7 @@ const AddBlockModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (ty
   );
 };
 
+// Main PageBuilder Component
 const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   const [sections, setSections] = useState<PlacedSection[]>([]);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -239,6 +292,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [addSectionModal, setAddSectionModal] = useState<'header' | 'sections' | 'footer' | null>(null);
   const [addBlockSectionId, setAddBlockSectionId] = useState<string | null>(null);
 
@@ -246,68 +300,142 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   const selectedSection = sections.find(s => s.id === selectedSectionId);
   const selectedBlock = selectedSection?.blocks.find(b => b.id === selectedBlockId);
 
+  // Fetch store layout from API
   useEffect(() => {
     const fetchLayout = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch('/api/v1/tenant-data/' + tenantId + '/store_layout');
+        const res = await fetch(`/api/tenant-data/${tenantId}/store_layout`);
         if (res.ok) {
-          const data = await res.json();
-          if (data?.sections) setSections(data.sections);
-          else setSections([
-            { id: uuidv4(), type: 'announcement-bar', name: 'Announcement bar', visible: true, settings: SECTION_DEFINITIONS['announcement-bar'].defaultSettings, blocks: [] },
-            { id: uuidv4(), type: 'header', name: 'Header', visible: true, settings: SECTION_DEFINITIONS['header'].defaultSettings, blocks: [] },
-            { id: uuidv4(), type: 'hero', name: 'Hero banner', visible: true, settings: SECTION_DEFINITIONS['hero'].defaultSettings, blocks: [] },
-            { id: uuidv4(), type: 'featured-collection', name: 'Featured collection', visible: true, settings: SECTION_DEFINITIONS['featured-collection'].defaultSettings, blocks: [] },
-            { id: uuidv4(), type: 'newsletter', name: 'Newsletter', visible: true, settings: SECTION_DEFINITIONS['newsletter'].defaultSettings, blocks: [] },
-            { id: uuidv4(), type: 'footer', name: 'Footer', visible: true, settings: SECTION_DEFINITIONS['footer'].defaultSettings, blocks: [] }
-          ]);
+          const result = await res.json();
+          if (result.data?.sections && Array.isArray(result.data.sections) && result.data.sections.length > 0) {
+            setSections(result.data.sections);
+            console.log('[PageBuilder] Loaded layout with', result.data.sections.length, 'sections');
+          } else {
+            // Use default layout for new stores
+            const defaultLayout = getDefaultLayout();
+            setSections(defaultLayout);
+            console.log('[PageBuilder] Using default layout');
+          }
+        } else {
+          // API returned error, use default layout
+          const defaultLayout = getDefaultLayout();
+          setSections(defaultLayout);
+          console.log('[PageBuilder] API error, using default layout');
         }
-      } catch (e) { console.error('Failed to fetch layout:', e); }
+      } catch (e) {
+        console.error('[PageBuilder] Failed to fetch layout:', e);
+        const defaultLayout = getDefaultLayout();
+        setSections(defaultLayout);
+      }
       setIsLoading(false);
     };
-    fetchLayout();
+    
+    if (tenantId) {
+      fetchLayout();
+    }
   }, [tenantId]);
 
+  // Keyboard shortcut for save
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); if (hasChanges) handleSave(); } };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (hasChanges && !isSaving) handleSave();
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [hasChanges]);
+  }, [hasChanges, isSaving]);
 
+  // Save layout to API
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveMessage(null);
+    
     try {
-      await fetch('/api/v1/tenant-data/' + tenantId + '/store_layout', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sections }) });
-      setHasChanges(false);
-    } catch (e) { console.error('Failed to save:', e); }
+      const res = await fetch(`/api/tenant-data/${tenantId}/store_layout`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { sections, updatedAt: new Date().toISOString() } })
+      });
+      
+      if (res.ok) {
+        setHasChanges(false);
+        setSaveMessage({ type: 'success', text: 'Layout saved! Your store has been updated.' });
+        setTimeout(() => setSaveMessage(null), 3000);
+        console.log('[PageBuilder] Layout saved successfully');
+      } else {
+        throw new Error('Failed to save');
+      }
+    } catch (e) {
+      console.error('[PageBuilder] Failed to save:', e);
+      setSaveMessage({ type: 'error', text: 'Failed to save layout. Please try again.' });
+    }
+    
     setIsSaving(false);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      setSections(prev => { const oldIdx = prev.findIndex(s => s.id === active.id); const newIdx = prev.findIndex(s => s.id === over.id); return arrayMove(prev, oldIdx, newIdx); });
+      setSections(prev => {
+        const oldIdx = prev.findIndex(s => s.id === active.id);
+        const newIdx = prev.findIndex(s => s.id === over.id);
+        return arrayMove(prev, oldIdx, newIdx);
+      });
       setHasChanges(true);
     }
   };
 
   const handleAddSection = (type: SectionType) => {
     const def = SECTION_DEFINITIONS[type];
-    const newSection: PlacedSection = { id: uuidv4(), type, name: def.label, visible: true, settings: { ...def.defaultSettings }, blocks: [] };
+    const newSection: PlacedSection = {
+      id: uuidv4(),
+      type,
+      name: def.label,
+      visible: true,
+      settings: { ...def.defaultSettings },
+      blocks: []
+    };
+    
     setSections(prev => {
-      if (def.category === 'header') { const headerIdx = prev.findIndex(s => SECTION_DEFINITIONS[s.type].category !== 'header'); return [...prev.slice(0, headerIdx >= 0 ? headerIdx : prev.length), newSection, ...prev.slice(headerIdx >= 0 ? headerIdx : prev.length)]; }
+      if (def.category === 'header') {
+        const headerIdx = prev.findIndex(s => SECTION_DEFINITIONS[s.type].category !== 'header');
+        return [...prev.slice(0, headerIdx >= 0 ? headerIdx : prev.length), newSection, ...prev.slice(headerIdx >= 0 ? headerIdx : prev.length)];
+      }
       if (def.category === 'footer') return [...prev, newSection];
       const footerIdx = prev.findIndex(s => SECTION_DEFINITIONS[s.type].category === 'footer');
       return [...prev.slice(0, footerIdx >= 0 ? footerIdx : prev.length), newSection, ...prev.slice(footerIdx >= 0 ? footerIdx : prev.length)];
     });
+    
     setHasChanges(true);
     setSelectedSectionId(newSection.id);
   };
 
-  const handleDeleteSection = (id: string) => { setSections(prev => prev.filter(s => s.id !== id)); setHasChanges(true); if (selectedSectionId === id) { setSelectedSectionId(null); setSelectedBlockId(null); } };
-  const handleToggleVisibility = (id: string) => { setSections(prev => prev.map(s => s.id === id ? { ...s, visible: !s.visible } : s)); setHasChanges(true); };
-  const handleToggleExpand = (id: string) => setExpandedSections(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  const handleUpdateSectionSettings = (settings: Record<string, any>) => { setSections(prev => prev.map(s => s.id === selectedSectionId ? { ...s, settings } : s)); setHasChanges(true); };
+  const handleDeleteSection = (id: string) => {
+    setSections(prev => prev.filter(s => s.id !== id));
+    setHasChanges(true);
+    if (selectedSectionId === id) {
+      setSelectedSectionId(null);
+      setSelectedBlockId(null);
+    }
+  };
+
+  const handleToggleVisibility = (id: string) => {
+    setSections(prev => prev.map(s => s.id === id ? { ...s, visible: !s.visible } : s));
+    setHasChanges(true);
+  };
+
+  const handleToggleExpand = (id: string) => {
+    setExpandedSections(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const handleUpdateSectionSettings = (settings: Record<string, any>) => {
+    setSections(prev => prev.map(s => s.id === selectedSectionId ? { ...s, settings } : s));
+    setHasChanges(true);
+  };
+
   const handleAddBlock = (type: BlockType) => {
     if (!addBlockSectionId) return;
     const newBlock: Block = { id: uuidv4(), type, settings: { ...BLOCK_DEFINITIONS[type].defaultSettings } };
@@ -315,8 +443,12 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
     setHasChanges(true);
     setAddBlockSectionId(null);
   };
-  const handlePreview = () => window.open('/store/' + tenantId, '_blank');
 
+  const handlePreview = () => {
+    window.open(`/store/${tenantId}`, '_blank');
+  };
+
+  // Group sections by category
   const headerSections = sections.filter(s => SECTION_DEFINITIONS[s.type]?.category === 'header');
   const mainSections = sections.filter(s => SECTION_DEFINITIONS[s.type]?.category === 'sections');
   const footerSections = sections.filter(s => SECTION_DEFINITIONS[s.type]?.category === 'footer');
@@ -326,49 +458,195 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
       <div className="px-3 py-2"><h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{title}</h3></div>
       <div className="px-2 pb-2 space-y-0.5">
         <SortableContext items={sectionList.map(s => s.id)} strategy={verticalListSortingStrategy}>
-          {sectionList.map((section) => <SortableSectionItem key={section.id} section={section} isSelected={selectedSectionId === section.id} isExpanded={expandedSections.includes(section.id)} selectedBlockId={selectedSectionId === section.id ? selectedBlockId : null} onSelect={() => { setSelectedSectionId(section.id); setSelectedBlockId(null); }} onToggleExpand={() => handleToggleExpand(section.id)} onToggleVisibility={() => handleToggleVisibility(section.id)} onDelete={() => handleDeleteSection(section.id)} onSelectBlock={(blockId) => { setSelectedSectionId(section.id); setSelectedBlockId(blockId); }} onAddBlock={() => setAddBlockSectionId(section.id)} />)}
+          {sectionList.map((section) => (
+            <SortableSectionItem
+              key={section.id}
+              section={section}
+              isSelected={selectedSectionId === section.id}
+              isExpanded={expandedSections.includes(section.id)}
+              selectedBlockId={selectedSectionId === section.id ? selectedBlockId : null}
+              onSelect={() => { setSelectedSectionId(section.id); setSelectedBlockId(null); }}
+              onToggleExpand={() => handleToggleExpand(section.id)}
+              onToggleVisibility={() => handleToggleVisibility(section.id)}
+              onDelete={() => handleDeleteSection(section.id)}
+              onSelectBlock={(blockId) => { setSelectedSectionId(section.id); setSelectedBlockId(blockId); }}
+              onAddBlock={() => setAddBlockSectionId(section.id)}
+            />
+          ))}
         </SortableContext>
-        <button onClick={() => setAddSectionModal(category)} className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg w-full"><Icons.Plus /><span>Add section</span></button>
+        <button onClick={() => setAddSectionModal(category)} className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg w-full">
+          <Icons.Plus /><span>Add section</span>
+        </button>
       </div>
     </div>
   );
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center"><Icons.Loader /><span className="ml-2">Loading...</span></div>;
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Icons.Loader />
+          <p className="mt-3 text-gray-600">Loading store builder...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-white">
+      {/* Header */}
       <header className="h-14 bg-white border-b flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-gray-100 rounded-lg" title="Back"><Icons.ArrowLeft /></button>
-          <div className="flex items-center gap-2"><span className="font-semibold text-gray-900">Store Builder</span><span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">● Live</span>{hasChanges && <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Unsaved changes</span>}</div>
+          <button onClick={() => window.history.back()} className="p-2 hover:bg-gray-100 rounded-lg" title="Back"><Icons.ArrowLeft /></button>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-gray-900">Store Builder</span>
+            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">● Live</span>
+            {hasChanges && <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Unsaved changes</span>}
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-sm text-gray-600"><Icons.Home /><span>Home page</span></div>
+        
+        <div className="flex items-center gap-1 text-sm text-gray-600">
+          <Icons.Home /><span>Home page</span>
+        </div>
+        
         <div className="flex items-center gap-2">
-          <div className="flex items-center border rounded-lg p-1 mr-2">{[{ id: 'desktop', Icon: Icons.Monitor }, { id: 'tablet', Icon: Icons.Tablet }, { id: 'mobile', Icon: Icons.Smartphone }].map(({ id, Icon }) => <button key={id} onClick={() => setDevicePreview(id as any)} className={`p-2 rounded-md transition ${devicePreview === id ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}><Icon /></button>)}</div>
-          <button onClick={handlePreview} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500" title="Preview"><Icons.Eye /></button>
-          <button onClick={handleSave} disabled={!hasChanges || isSaving} className={`ml-2 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition ${hasChanges ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}>{isSaving ? <><Icons.Loader /> Saving...</> : <><Icons.Save /> Save</>}</button>
+          {/* Device Preview Toggle */}
+          <div className="flex items-center border rounded-lg p-1 mr-2">
+            {[{ id: 'desktop', Icon: Icons.Monitor }, { id: 'tablet', Icon: Icons.Tablet }, { id: 'mobile', Icon: Icons.Smartphone }].map(({ id, Icon }) => (
+              <button key={id} onClick={() => setDevicePreview(id as any)} className={`p-2 rounded-md transition ${devicePreview === id ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
+                <Icon />
+              </button>
+            ))}
+          </div>
+          
+          <button onClick={handlePreview} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500" title="Preview store">
+            <Icons.Eye />
+          </button>
+          
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            className={`ml-2 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition ${hasChanges ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+          >
+            {isSaving ? <><Icons.Loader /> Saving...</> : <><Icons.Save /> Save</>}
+          </button>
         </div>
       </header>
+
+      {/* Save Message Toast */}
+      {saveMessage && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${saveMessage.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+          {saveMessage.type === 'success' ? <Icons.Check /> : <Icons.X />}
+          {saveMessage.text}
+        </div>
+      )}
+
+      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          {/* Left Sidebar - Section List */}
           <aside className="w-64 bg-white border-r flex flex-col h-full overflow-hidden">
-            <div className="p-3 border-b"><button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition"><Icons.Home /><span className="text-sm font-medium text-gray-700 flex-1 text-left">Home page</span><Icons.ChevronDown /></button></div>
-            <div className="flex-1 overflow-y-auto">{renderSectionGroup('Header', headerSections, 'header')}{renderSectionGroup('Template', mainSections, 'sections')}{renderSectionGroup('Footer', footerSections, 'footer')}</div>
-            <div className="p-3 border-t"><button className="w-full flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"><Icons.Settings /><span className="text-sm">Theme settings</span></button></div>
+            <div className="p-3 border-b">
+              <button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                <Icons.Home />
+                <span className="text-sm font-medium text-gray-700 flex-1 text-left">Home page</span>
+                <Icons.ChevronDown />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto">
+              {renderSectionGroup('Header', headerSections, 'header')}
+              {renderSectionGroup('Template', mainSections, 'sections')}
+              {renderSectionGroup('Footer', footerSections, 'footer')}
+            </div>
+            
+            <div className="p-3 border-t">
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                <Icons.Settings />
+                <span className="text-sm">Theme settings</span>
+              </button>
+            </div>
           </aside>
-          <StorePreview sections={sections} selectedSectionId={selectedSectionId} devicePreview={devicePreview} onSelectSection={(id) => { setSelectedSectionId(id); setSelectedBlockId(null); }} />
+
+          {/* Center - Store Preview */}
+          <StorePreview
+            sections={sections}
+            selectedSectionId={selectedSectionId}
+            devicePreview={devicePreview}
+            onSelectSection={(id) => { setSelectedSectionId(id); setSelectedBlockId(null); }}
+          />
+
+          {/* Right Sidebar - Settings Panel */}
           <aside className="w-72 bg-white border-l flex flex-col h-full">
             {selectedSection ? (
               <>
-                <div className="p-4 border-b">{selectedBlockId && <button onClick={() => setSelectedBlockId(null)} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-3 transition"><Icons.ArrowLeft /><span>Back to section</span></button>}<div className="flex items-center gap-2">{SECTION_DEFINITIONS[selectedSection.type]?.icon}<h3 className="font-semibold text-gray-900">{selectedBlockId ? BLOCK_DEFINITIONS[selectedBlock?.type || 'text']?.label : selectedSection.name}</h3></div><p className="text-sm text-gray-500 mt-1">{SECTION_DEFINITIONS[selectedSection.type]?.description}</p></div>
-                <div className="flex-1 overflow-y-auto p-4">{selectedBlockId && selectedBlock ? <div className="space-y-3">{Object.entries(selectedBlock.settings).map(([k, v]) => <div key={k}><label className="text-sm text-gray-700 block mb-1 capitalize">{k.replace(/([A-Z])/g, ' $1')}</label><input type="text" value={String(v)} onChange={(e) => { const newSettings = { ...selectedBlock.settings, [k]: e.target.value }; setSections(prev => prev.map(s => { if (s.id !== selectedSectionId) return s; return { ...s, blocks: s.blocks.map(b => b.id === selectedBlockId ? { ...b, settings: newSettings } : b) }; })); setHasChanges(true); }} className="w-full px-3 py-2 text-sm border rounded-lg" /></div>)}</div> : <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} />}</div>
+                <div className="p-4 border-b">
+                  {selectedBlockId && (
+                    <button onClick={() => setSelectedBlockId(null)} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-3 transition">
+                      <Icons.ArrowLeft /><span>Back to section</span>
+                    </button>
+                  )}
+                  <div className="flex items-center gap-2">
+                    {SECTION_DEFINITIONS[selectedSection.type]?.icon}
+                    <h3 className="font-semibold text-gray-900">
+                      {selectedBlockId ? BLOCK_DEFINITIONS[selectedBlock?.type || 'text']?.label : selectedSection.name}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{SECTION_DEFINITIONS[selectedSection.type]?.description}</p>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-4">
+                  {selectedBlockId && selectedBlock ? (
+                    <div className="space-y-3">
+                      {Object.entries(selectedBlock.settings).map(([k, v]) => (
+                        <div key={k}>
+                          <label className="text-sm text-gray-700 block mb-1 capitalize">{k.replace(/([A-Z])/g, ' $1')}</label>
+                          <input
+                            type="text"
+                            value={String(v)}
+                            onChange={(e) => {
+                              const newSettings = { ...selectedBlock.settings, [k]: e.target.value };
+                              setSections(prev => prev.map(s => {
+                                if (s.id !== selectedSectionId) return s;
+                                return { ...s, blocks: s.blocks.map(b => b.id === selectedBlockId ? { ...b, settings: newSettings } : b) };
+                              }));
+                              setHasChanges(true);
+                            }}
+                            className="w-full px-3 py-2 text-sm border rounded-lg"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} />
+                  )}
+                </div>
               </>
-            ) : <div className="p-4"><div className="flex items-center gap-3 mb-2 text-gray-400"><Icons.Settings /></div><h3 className="font-semibold text-gray-900">Customize your store</h3><p className="text-sm text-gray-500 mt-1">Select a section from the left panel to customize it.</p></div>}
+            ) : (
+              <div className="p-4">
+                <div className="flex items-center gap-3 mb-2 text-gray-400"><Icons.Settings /></div>
+                <h3 className="font-semibold text-gray-900">Customize your store</h3>
+                <p className="text-sm text-gray-500 mt-1">Select a section from the left panel to customize it.</p>
+              </div>
+            )}
           </aside>
         </DndContext>
       </div>
-      <AddSectionModal isOpen={addSectionModal !== null} onClose={() => setAddSectionModal(null)} onAdd={handleAddSection} category={addSectionModal || 'sections'} />
-      <AddBlockModal isOpen={addBlockSectionId !== null} onClose={() => setAddBlockSectionId(null)} onAdd={handleAddBlock} allowedBlocks={addBlockSectionId ? SECTION_DEFINITIONS[sections.find(s => s.id === addBlockSectionId)?.type || 'hero']?.allowedBlocks || [] : []} />
+
+      {/* Modals */}
+      <AddSectionModal
+        isOpen={addSectionModal !== null}
+        onClose={() => setAddSectionModal(null)}
+        onAdd={handleAddSection}
+        category={addSectionModal || 'sections'}
+      />
+      
+      <AddBlockModal
+        isOpen={addBlockSectionId !== null}
+        onClose={() => setAddBlockSectionId(null)}
+        onAdd={handleAddBlock}
+        allowedBlocks={addBlockSectionId ? SECTION_DEFINITIONS[sections.find(s => s.id === addBlockSectionId)?.type || 'hero']?.allowedBlocks || [] : []}
+      />
     </div>
   );
 };
