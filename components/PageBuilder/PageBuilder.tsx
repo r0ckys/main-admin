@@ -3,6 +3,7 @@ import { DndContext, closestCenter, DragEndEvent, useSensor, useSensors, Pointer
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 
 // Types
 type SectionType = 'announcement-bar' | 'header' | 'hero' | 'featured-collection' | 'rich-text' | 'image-with-text' | 'image-banner' | 'slideshow' | 'video' | 'newsletter' | 'collection-list' | 'product-grid' | 'testimonials' | 'contact-form' | 'map' | 'multicolumn' | 'collapsible-content' | 'custom-html' | 'footer' | 'featured-product' | 'blog-posts' | 'brand-list' | 'flash-sale' | 'categories' | 'brands' | 'tags-products';
@@ -231,7 +232,7 @@ const SettingsField: React.FC<{
     if (!file || !tenantId) return;
     
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
     
@@ -241,9 +242,11 @@ const SettingsField: React.FC<{
       const { uploadPreparedImageToServer } = await import('../../services/imageUploadService');
       const imageUrl = await uploadPreparedImageToServer(file, tenantId, 'gallery');
       handleChange(imageUrl);
+      toast.success('Image uploaded successfully');
     } catch (error) {
       console.error('Image upload failed:', error);
-      alert('Failed to upload image. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to upload image: ${errorMessage}`);
     } finally {
       setUploading(false);
     }
@@ -256,11 +259,19 @@ const SettingsField: React.FC<{
         <div className="space-y-2">
           {value && (
             <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
-              <img src={value} alt={label} className="w-full h-full object-cover" />
+              <img 
+                src={value} 
+                alt={label} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EBroken Image%3C/text%3E%3C/svg%3E';
+                }}
+              />
               <button
                 onClick={(e) => { e.stopPropagation(); handleChange(''); }}
                 className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded hover:bg-red-600"
                 type="button"
+                title="Remove image"
               >
                 <Icons.X />
               </button>
@@ -280,6 +291,7 @@ const SettingsField: React.FC<{
               disabled={uploading || !tenantId}
               className="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               type="button"
+              title={!tenantId ? 'Tenant ID required for upload' : 'Upload an image from your computer'}
             >
               {uploading ? 'Uploading...' : 'Upload Image'}
             </button>
