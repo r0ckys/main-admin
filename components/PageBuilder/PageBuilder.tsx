@@ -167,37 +167,38 @@ const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: str
       case 'announcement-bar':
         return <div className={`${baseClass} py-2 px-4 text-center text-sm`} style={{ backgroundColor: section.settings.backgroundColor, color: section.settings.textColor }}>{section.settings.text}</div>;
       case 'header':
-        return <div className={`${baseClass} flex items-center justify-between px-6 py-4 bg-white border-b`}><div className="text-xl font-bold">{section.settings.logoText}</div><div className="flex gap-6 text-sm"><span className="text-gray-600">Shop</span><span className="text-gray-600">About</span><span className="text-gray-600">Contact</span></div><div className="flex gap-4"><Icons.Search /><Icons.ShoppingBag /></div></div>;
+        return <div className={`${baseClass} flex items-center justify-between px-4 sm:px-6 py-4 bg-white border-b`}><div className="text-lg sm:text-xl font-bold">{section.settings.logoText}</div><div className="hidden sm:flex gap-6 text-sm"><span className="text-gray-600">Shop</span><span className="text-gray-600">About</span><span className="text-gray-600">Contact</span></div><div className="flex gap-4"><Icons.Search /><Icons.ShoppingBag /></div></div>;
       case 'hero':
-        return <div className={`${baseClass} relative ${section.settings.height === 'large' ? 'min-h-[400px]' : section.settings.height === 'medium' ? 'min-h-[300px]' : 'min-h-[200px]'} flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white`}><div className="text-center px-8"><h1 className="text-3xl font-bold mb-3">{section.settings.heading}</h1><p className="text-lg text-white/80 mb-4">{section.settings.subheading}</p>{section.settings.buttonText && <button className="px-6 py-2 bg-white text-purple-600 rounded-lg font-medium">{section.settings.buttonText}</button>}</div></div>;
+        return <div className={`${baseClass} relative ${section.settings.height === 'large' ? 'min-h-[300px] sm:min-h-[400px]' : section.settings.height === 'medium' ? 'min-h-[200px] sm:min-h-[300px]' : 'min-h-[150px] sm:min-h-[200px]'} flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 text-white`}><div className="text-center px-4 sm:px-8"><h1 className="text-2xl sm:text-3xl font-bold mb-3">{section.settings.heading}</h1><p className="text-base sm:text-lg text-white/80 mb-4">{section.settings.subheading}</p>{section.settings.buttonText && <button className="px-4 sm:px-6 py-2 bg-white text-purple-600 rounded-lg font-medium text-sm sm:text-base">{section.settings.buttonText}</button>}</div></div>;
       case 'categories':
-        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-xl font-bold text-center mb-6">{section.settings.title}</h2><div className="grid grid-cols-4 gap-4">{[1,2,3,4].map(i => <div key={i} className="bg-gray-100 rounded-lg p-4 text-center"><div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2" /><span className="text-sm font-medium">Category {i}</span></div>)}</div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6`}><h2 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6">{section.settings.title}</h2><div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">{[1,2,3,4].map(i => <div key={i} className="bg-gray-100 rounded-lg p-3 sm:p-4 text-center"><div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-200 rounded-full mx-auto mb-2" /><span className="text-xs sm:text-sm font-medium">Category {i}</span></div>)}</div></div>;
       case 'flash-sale':
-        return <div className={`${baseClass} py-8 px-6 bg-gradient-to-r from-red-500 to-orange-500`}><div className="flex items-center justify-between mb-4"><h2 className="text-xl font-bold text-white">{section.settings.title}</h2>{section.settings.showCountdown && <div className="text-white text-sm">⏰ 23:59:59</div>}</div><div className="grid grid-cols-4 gap-3">{[1,2,3,4].map(i => <div key={i} className="bg-white rounded-lg p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-3 bg-gray-100 rounded w-1/2" /></div>)}</div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6 bg-gradient-to-r from-red-500 to-orange-500`}><div className="flex items-center justify-between mb-4"><h2 className="text-lg sm:text-xl font-bold text-white">{section.settings.title}</h2>{section.settings.showCountdown && <div className="text-white text-xs sm:text-sm">⏰ 23:59:59</div>}</div><div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">{[1,2,3,4].map(i => <div key={i} className="bg-white rounded-lg p-2 sm:p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-2 sm:h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-2 sm:h-3 bg-gray-100 rounded w-1/2" /></div>)}</div></div>;
       case 'product-grid':
-        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-xl font-bold mb-6">{section.settings.heading}</h2><div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${section.settings.columns}, 1fr)` }}>{Array(section.settings.productsToShow > 8 ? 8 : section.settings.productsToShow).fill(0).map((_, i) => <div key={i} className="bg-gray-50 rounded-lg p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-3 bg-gray-200 rounded w-1/2" /></div>)}</div></div>;
+        const responsiveColumns = window.innerWidth < 640 ? Math.min(section.settings.columns, 2) : section.settings.columns;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6`}><h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">{section.settings.heading}</h2><div className="grid gap-3 sm:gap-4" style={{ gridTemplateColumns: `repeat(${responsiveColumns}, 1fr)` }}>{Array(section.settings.productsToShow > 8 ? 8 : section.settings.productsToShow).fill(0).map((_, i) => <div key={i} className="bg-gray-50 rounded-lg p-2 sm:p-3"><div className="bg-gray-100 aspect-square rounded mb-2" /><div className="h-2 sm:h-3 bg-gray-100 rounded w-3/4 mb-1" /><div className="h-2 sm:h-3 bg-gray-200 rounded w-1/2" /></div>)}</div></div>;
       case 'brands':
-        return <div className={`${baseClass} py-8 px-6`}><h2 className="text-lg font-bold text-center mb-6">{section.settings.title}</h2><div className="flex justify-center gap-8">{[1,2,3,4,5,6].map(i => <div key={i} className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">Brand {i}</div>)}</div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6`}><h2 className="text-base sm:text-lg font-bold text-center mb-4 sm:mb-6">{section.settings.title}</h2><div className="flex justify-center gap-4 sm:gap-8 overflow-x-auto">{[1,2,3,4,5,6].map(i => <div key={i} className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs flex-shrink-0">Brand {i}</div>)}</div></div>;
       case 'newsletter':
-        return <div className={`${baseClass} py-10 px-6 text-center`} style={{ backgroundColor: section.settings.backgroundColor }}><h2 className="text-xl font-bold mb-2">{section.settings.heading}</h2><p className="text-gray-600 mb-4 text-sm">{section.settings.subheading}</p><div className="flex max-w-md mx-auto"><input className="flex-1 px-4 py-2 border rounded-l-lg text-sm" placeholder="Enter your email" /><button className="px-4 py-2 bg-gray-900 text-white rounded-r-lg text-sm">{section.settings.buttonText}</button></div></div>;
+        return <div className={`${baseClass} py-8 sm:py-10 px-4 sm:px-6 text-center`} style={{ backgroundColor: section.settings.backgroundColor }}><h2 className="text-lg sm:text-xl font-bold mb-2">{section.settings.heading}</h2><p className="text-gray-600 mb-4 text-sm">{section.settings.subheading}</p><div className="flex flex-col sm:flex-row max-w-md mx-auto gap-2"><input className="flex-1 px-4 py-2 border rounded-lg sm:rounded-l-lg sm:rounded-r-none text-sm" placeholder="Enter your email" /><button className="px-4 py-2 bg-gray-900 text-white rounded-lg sm:rounded-r-lg sm:rounded-l-none text-sm">{section.settings.buttonText}</button></div></div>;
       case 'footer':
-        return <div className={`${baseClass} py-10 px-6 bg-gray-900 text-white`}><div className="grid grid-cols-4 gap-6 mb-6">{[1,2,3,4].map(i => <div key={i}><div className="h-4 bg-gray-700 rounded w-1/2 mb-3" /><div className="space-y-2">{[1,2,3].map(j => <div key={j} className="h-3 bg-gray-700 rounded w-3/4" />)}</div></div>)}</div><div className="text-center text-gray-400 text-sm pt-6 border-t border-gray-800">{section.settings.copyrightText}</div></div>;
+        return <div className={`${baseClass} py-8 sm:py-10 px-4 sm:px-6 bg-gray-900 text-white`}><div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6">{[1,2,3,4].map(i => <div key={i}><div className="h-3 sm:h-4 bg-gray-700 rounded w-1/2 mb-3" /><div className="space-y-2">{[1,2,3].map(j => <div key={j} className="h-2 sm:h-3 bg-gray-700 rounded w-3/4" />)}</div></div>)}</div><div className="text-center text-gray-400 text-xs sm:text-sm pt-6 border-t border-gray-800">{section.settings.copyrightText}</div></div>;
       case 'image-with-text':
-        return <div className={`${baseClass} py-8 px-6`}><div className={`flex gap-8 items-center ${section.settings.imagePosition === 'right' ? 'flex-row-reverse' : ''}`}><div className="flex-1 bg-gray-200 aspect-video rounded-lg" /><div className="flex-1"><h2 className="text-xl font-bold mb-3">{section.settings.heading}</h2><p className="text-gray-600 text-sm mb-4">{section.settings.text}</p>{section.settings.buttonText && <button className="px-4 py-2 border border-gray-900 rounded-lg text-sm">{section.settings.buttonText}</button>}</div></div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6`}><div className={`flex flex-col sm:flex-row gap-6 sm:gap-8 items-center ${section.settings.imagePosition === 'right' ? 'sm:flex-row-reverse' : ''}`}><div className="w-full sm:flex-1 bg-gray-200 aspect-video rounded-lg" /><div className="w-full sm:flex-1"><h2 className="text-lg sm:text-xl font-bold mb-3">{section.settings.heading}</h2><p className="text-gray-600 text-sm mb-4">{section.settings.text}</p>{section.settings.buttonText && <button className="px-4 py-2 border border-gray-900 rounded-lg text-sm">{section.settings.buttonText}</button>}</div></div></div>;
       case 'testimonials':
-        return <div className={`${baseClass} py-8 px-6 bg-gray-50`}><h2 className="text-xl font-bold text-center mb-6">{section.settings.heading}</h2><div className="grid grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="bg-white p-4 rounded-lg shadow-sm"><div className="flex gap-1 text-yellow-400 mb-3">{[1,2,3,4,5].map(s => <Icons.Star key={s} />)}</div><p className="text-gray-600 text-sm mb-3">"Amazing product!"</p><div className="flex items-center gap-2"><div className="w-8 h-8 bg-gray-200 rounded-full" /><span className="text-sm font-medium">Customer</span></div></div>)}</div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6 bg-gray-50`}><h2 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6">{section.settings.heading}</h2><div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">{[1,2,3].map(i => <div key={i} className="bg-white p-4 rounded-lg shadow-sm"><div className="flex gap-1 text-yellow-400 mb-3">{[1,2,3,4,5].map(s => <Icons.Star key={s} />)}</div><p className="text-gray-600 text-sm mb-3">"Amazing product!"</p><div className="flex items-center gap-2"><div className="w-8 h-8 bg-gray-200 rounded-full" /><span className="text-sm font-medium">Customer</span></div></div>)}</div></div>;
       case 'rich-text':
-        return <div className={`${baseClass} py-8 px-6`} style={{ backgroundColor: section.settings.backgroundColor, textAlign: section.settings.textAlign as any }}><div className="max-w-2xl mx-auto text-gray-700">{section.settings.content}</div></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6`} style={{ backgroundColor: section.settings.backgroundColor, textAlign: section.settings.textAlign as any }}><div className="max-w-2xl mx-auto text-gray-700 text-sm sm:text-base">{section.settings.content}</div></div>;
       default:
-        return <div className={`${baseClass} py-8 px-6 bg-gray-50 text-center`}><div className="text-gray-400">{SECTION_DEFINITIONS[section.type]?.icon}</div><p className="text-gray-500 mt-2 text-sm">{section.name}</p></div>;
+        return <div className={`${baseClass} py-6 sm:py-8 px-4 sm:px-6 bg-gray-50 text-center`}><div className="text-gray-400">{SECTION_DEFINITIONS[section.type]?.icon}</div><p className="text-gray-500 mt-2 text-sm">{section.name}</p></div>;
     }
   };
   
   return (
-    <main className="flex-1 bg-gray-100 overflow-auto p-4">
+    <main className="flex-1 bg-gray-100 overflow-auto p-2 sm:p-4">
       <div className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all" style={{ maxWidth: deviceWidths[devicePreview], minHeight: 'calc(100vh - 140px)' }}>
         {visibleSections.map(section => <div key={section.id} onClick={() => onSelectSection(section.id)}>{renderSection(section)}</div>)}
-        {visibleSections.length === 0 && <div className="flex flex-col items-center justify-center h-96 text-gray-400"><Icons.Layers /><p className="mt-4">Add sections to build your page</p></div>}
+        {visibleSections.length === 0 && <div className="flex flex-col items-center justify-center h-96 text-gray-400 p-4"><Icons.Layers /><p className="mt-4 text-center text-sm sm:text-base">Add sections to build your page</p></div>}
       </div>
     </main>
   );
@@ -320,15 +321,15 @@ const AddSectionModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (
     .filter(([type, def]) => (category === 'sections' ? def.category === 'sections' : def.category === category) && (def.label.toLowerCase().includes(search.toLowerCase()) || def.description.toLowerCase().includes(search.toLowerCase())));
   
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b flex items-center justify-between"><h2 className="text-lg font-semibold">Add section</h2><button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Icons.X /></button></div>
         <div className="p-4 border-b"><div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Icons.Search /></div><input type="text" value={search} onChange={(e) => setSearch(e.target.value)} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} placeholder="Search sections..." className="w-full pl-10 pr-4 py-2 border rounded-lg" /></div></div>
-        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-3">
+        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredSections.map(([type, def]) => (
             <button key={type} onClick={() => { onAdd(type); onClose(); }} className="flex items-start gap-3 p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left transition-all">
-              <div className="p-2 bg-gray-100 rounded-lg text-gray-600">{def.icon}</div>
-              <div><div className="font-medium text-gray-900">{def.label}</div><div className="text-sm text-gray-500">{def.description}</div></div>
+              <div className="p-2 bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">{def.icon}</div>
+              <div className="min-w-0"><div className="font-medium text-gray-900">{def.label}</div><div className="text-sm text-gray-500 break-words">{def.description}</div></div>
             </button>
           ))}
         </div>
@@ -341,10 +342,10 @@ const AddSectionModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (
 const AddBlockModal: React.FC<{ isOpen: boolean; onClose: () => void; onAdd: (type: BlockType) => void; allowedBlocks: BlockType[] }> = ({ isOpen, onClose, onAdd, allowedBlocks }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-[400px]" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b flex items-center justify-between"><h2 className="text-lg font-semibold">Add block</h2><button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Icons.X /></button></div>
-        <div className="p-4 grid grid-cols-2 gap-2">
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {allowedBlocks.map(type => {
             const def = BLOCK_DEFINITIONS[type];
             return <button key={type} onClick={() => { onAdd(type); onClose(); }} className="flex items-center gap-2 p-3 border rounded-lg hover:border-blue-500 hover:bg-blue-50 text-left transition-all">{def.icon}<span className="text-sm font-medium">{def.label}</span></button>;
@@ -368,6 +369,9 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [addSectionModal, setAddSectionModal] = useState<'header' | 'sections' | 'footer' | null>(null);
   const [addBlockSectionId, setAddBlockSectionId] = useState<string | null>(null);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: string; name: string } | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const selectedSection = sections.find(s => s.id === selectedSectionId);
@@ -420,6 +424,18 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [hasChanges, isSaving]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
 
   // Save layout to API
   const handleSave = async () => {
@@ -487,12 +503,20 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   };
 
   const handleDeleteSection = (id: string) => {
-    setSections(prev => prev.filter(s => s.id !== id));
+    const section = sections.find(s => s.id === id);
+    if (!section) return;
+    setDeleteConfirmation({ id, name: section.name });
+  };
+
+  const confirmDeleteSection = () => {
+    if (!deleteConfirmation) return;
+    setSections(prev => prev.filter(s => s.id !== deleteConfirmation.id));
     setHasChanges(true);
-    if (selectedSectionId === id) {
+    if (selectedSectionId === deleteConfirmation.id) {
       setSelectedSectionId(null);
       setSelectedBlockId(null);
     }
+    setDeleteConfirmation(null);
   };
 
   const handleToggleVisibility = (id: string) => {
@@ -568,40 +592,65 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Header */}
-      <header className="h-14 bg-white border-b flex items-center justify-between px-4 flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <button onClick={() => window.history.back()} className="p-2 hover:bg-gray-100 rounded-lg" title="Back"><Icons.ArrowLeft /></button>
+      <header className="h-14 bg-white border-b flex items-center justify-between px-2 sm:px-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Mobile menu toggle */}
+          <button 
+            onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} 
+            className="p-2 hover:bg-gray-100 rounded-lg lg:hidden" 
+            title="Toggle sections"
+            aria-label="Toggle sections menu"
+          >
+            <Icons.Menu />
+          </button>
+          
+          <button onClick={() => window.history.back()} className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block" title="Back"><Icons.ArrowLeft /></button>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-900">Store Builder</span>
-            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">● Live</span>
-            {hasChanges && <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Unsaved changes</span>}
+            <span className="font-semibold text-gray-900 text-sm sm:text-base">Store Builder</span>
+            <span className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">● Live</span>
+            {hasChanges && <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Unsaved</span>}
           </div>
         </div>
         
-        <div className="flex items-center gap-1 text-sm text-gray-600">
+        <div className="hidden md:flex items-center gap-1 text-sm text-gray-600">
           <Icons.Home /><span>Home page</span>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Device Preview Toggle */}
-          <div className="flex items-center border rounded-lg p-1 mr-2">
+          <div className="flex items-center border rounded-lg p-0.5 sm:p-1 mr-1 sm:mr-2">
             {[{ id: 'desktop', Icon: Icons.Monitor }, { id: 'tablet', Icon: Icons.Tablet }, { id: 'mobile', Icon: Icons.Smartphone }].map(({ id, Icon }) => (
-              <button key={id} onClick={() => setDevicePreview(id as any)} className={`p-2 rounded-md transition ${devicePreview === id ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
+              <button 
+                key={id} 
+                onClick={() => setDevicePreview(id as any)} 
+                className={`p-1 sm:p-2 rounded-md transition ${devicePreview === id ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                aria-label={`${id} preview`}
+              >
                 <Icon />
               </button>
             ))}
           </div>
           
-          <button onClick={handlePreview} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500" title="Preview store">
+          <button onClick={handlePreview} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hidden sm:block" title="Preview store">
             <Icons.Eye />
+          </button>
+          
+          {/* Mobile settings toggle */}
+          <button 
+            onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)} 
+            className="p-2 hover:bg-gray-100 rounded-lg lg:hidden" 
+            title="Toggle settings"
+            aria-label="Toggle settings panel"
+          >
+            <Icons.Settings />
           </button>
           
           <button
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
-            className={`ml-2 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition ${hasChanges ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+            className={`px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2 transition ${hasChanges ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
           >
-            {isSaving ? <><Icons.Loader /> Saving...</> : <><Icons.Save /> Save</>}
+            {isSaving ? <><Icons.Loader /> <span className="hidden sm:inline">Saving...</span></> : <><Icons.Save /> <span className="hidden sm:inline">Save</span></>}
           </button>
         </div>
       </header>
@@ -615,10 +664,35 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           {/* Left Sidebar - Section List */}
-          <aside className="w-64 bg-white border-r flex flex-col h-full overflow-hidden">
+          {/* Mobile overlay */}
+          {isLeftSidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+              onClick={() => setIsLeftSidebarOpen(false)}
+            />
+          )}
+          
+          <aside className={`
+            fixed lg:static inset-y-0 left-0 z-50
+            w-64 bg-white border-r flex flex-col h-full overflow-hidden
+            transform transition-transform duration-200 ease-in-out
+            ${isLeftSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            top-14 lg:top-0
+          `}>
+            {/* Mobile close button */}
+            <div className="lg:hidden absolute top-2 right-2 z-10">
+              <button 
+                onClick={() => setIsLeftSidebarOpen(false)} 
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Close sections menu"
+              >
+                <Icons.X />
+              </button>
+            </div>
+            
             <div className="p-3 border-b">
               <button className="w-full flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
                 <Icons.Home />
@@ -646,68 +720,100 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
             sections={sections}
             selectedSectionId={selectedSectionId}
             devicePreview={devicePreview}
-            onSelectSection={(id) => { setSelectedSectionId(id); setSelectedBlockId(null); }}
+            onSelectSection={(id) => { 
+              setSelectedSectionId(id); 
+              setSelectedBlockId(null);
+              // Auto-open settings panel on mobile/tablet for better UX
+              if (window.innerWidth < 1024) {
+                setIsRightSidebarOpen(true);
+              }
+            }}
           />
         </DndContext>
 
-          {/* Right Sidebar - Settings Panel */}
-          <aside className="w-72 bg-white border-l flex flex-col h-full">
-            {selectedSection ? (
-              <>
-                <div className="p-4 border-b">
-                  {selectedBlockId && (
-                    <button onClick={() => setSelectedBlockId(null)} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-3 transition">
-                      <Icons.ArrowLeft /><span>Back to section</span>
-                    </button>
-                  )}
-                  <div className="flex items-center gap-2">
-                    {SECTION_DEFINITIONS[selectedSection.type]?.icon}
-                    <h3 className="font-semibold text-gray-900">
-                      {selectedBlockId ? BLOCK_DEFINITIONS[selectedBlock?.type || 'text']?.label : selectedSection.name}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">{SECTION_DEFINITIONS[selectedSection.type]?.description}</p>
+        {/* Right Sidebar - Settings Panel */}
+        {/* Mobile overlay */}
+        {isRightSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+            onClick={() => setIsRightSidebarOpen(false)}
+          />
+        )}
+        
+        <aside className={`
+          fixed lg:static inset-y-0 right-0 z-50
+          w-full sm:w-96 lg:w-80 xl:w-96 bg-white border-l flex flex-col h-full
+          transform transition-transform duration-200 ease-in-out
+          ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          top-14 lg:top-0
+        `}>
+          {/* Mobile close button */}
+          <div className="lg:hidden absolute top-2 right-2 z-10">
+            <button 
+              onClick={() => setIsRightSidebarOpen(false)} 
+              className="p-2 hover:bg-gray-100 rounded-lg"
+              aria-label="Close settings panel"
+            >
+              <Icons.X />
+            </button>
+          </div>
+          
+          {selectedSection ? (
+            <>
+              <div className="p-4 border-b">
+                {selectedBlockId && (
+                  <button onClick={() => setSelectedBlockId(null)} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-3 transition">
+                    <Icons.ArrowLeft /><span>Back to section</span>
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
+                  {SECTION_DEFINITIONS[selectedSection.type]?.icon}
+                  <h3 className="font-semibold text-gray-900">
+                    {selectedBlockId ? BLOCK_DEFINITIONS[selectedBlock?.type || 'text']?.label : selectedSection.name}
+                  </h3>
                 </div>
-                
-                <div className="flex-1 overflow-y-auto p-4">
-                  {selectedBlockId && selectedBlock ? (
-                    <div className="space-y-3">
-                      {Object.entries(selectedBlock.settings).map(([k, v]) => (
-                        <div key={k}>
-                          <label className="text-sm text-gray-700 block mb-1 capitalize">{k.replace(/([A-Z])/g, ' $1')}</label>
-                          <input
-                            type="text"
-                            onClick={(e) => e.stopPropagation()}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onFocus={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            value={String(v)}
-                            onChange={(e) => {
-                              const newSettings = { ...selectedBlock.settings, [k]: e.target.value };
-                              setSections(prev => prev.map(s => {
-                                if (s.id !== selectedSectionId) return s;
-                                return { ...s, blocks: s.blocks.map(b => b.id === selectedBlockId ? { ...b, settings: newSettings } : b) };
-                              }));
-                              setHasChanges(true);
-                            }}
-                            className="w-full px-3 py-2 text-sm border rounded-lg"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} />
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="p-4">
-                <div className="flex items-center gap-3 mb-2 text-gray-400"><Icons.Settings /></div>
-                <h3 className="font-semibold text-gray-900">Customize your store</h3>
-                <p className="text-sm text-gray-500 mt-1">Select a section from the left panel to customize it.</p>
+                <p className="text-sm text-gray-500 mt-1">{SECTION_DEFINITIONS[selectedSection.type]?.description}</p>
               </div>
-            )}
-          </aside>
+              
+              <div className="flex-1 overflow-y-auto p-4">
+                {selectedBlockId && selectedBlock ? (
+                  <div className="space-y-3">
+                    {Object.entries(selectedBlock.settings).map(([k, v]) => (
+                      <div key={k}>
+                        <label className="text-sm text-gray-700 block mb-1 capitalize">{k.replace(/([A-Z])/g, ' $1')}</label>
+                        <input
+                          type="text"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onFocus={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          value={String(v)}
+                          onChange={(e) => {
+                            const newSettings = { ...selectedBlock.settings, [k]: e.target.value };
+                            setSections(prev => prev.map(s => {
+                              if (s.id !== selectedSectionId) return s;
+                              return { ...s, blocks: s.blocks.map(b => b.id === selectedBlockId ? { ...b, settings: newSettings } : b) };
+                            }));
+                            setHasChanges(true);
+                          }}
+                          className="w-full px-3 py-2 text-sm border rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <SectionSettings section={selectedSection} onUpdate={handleUpdateSectionSettings} />
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-2 text-gray-400"><Icons.Settings /></div>
+              <h3 className="font-semibold text-gray-900">Customize your store</h3>
+              <p className="text-sm text-gray-500 mt-1">Select a section from the left panel to customize it.</p>
+            </div>
+          )}
+        </aside>
       </div>
 
       {/* Modals */}
@@ -724,6 +830,42 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
         onAdd={handleAddBlock}
         allowedBlocks={addBlockSectionId ? SECTION_DEFINITIONS[sections.find(s => s.id === addBlockSectionId)?.type || 'hero']?.allowedBlocks || [] : []}
       />
+      
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteConfirmation(null)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-red-100 rounded-full text-red-600">
+                  <Icons.Trash />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Delete Section</h2>
+                  <p className="text-sm text-gray-600">This action cannot be undone</p>
+                </div>
+              </div>
+              <p className="text-gray-700 mb-6">
+                Are you sure you want to delete "<strong>{deleteConfirmation.name}</strong>"? This will permanently remove this section from your store.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteConfirmation(null)} 
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDeleteSection} 
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
