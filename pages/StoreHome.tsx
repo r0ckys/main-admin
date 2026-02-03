@@ -253,8 +253,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
           onLoginClick={onLoginClick}
           onLogoutClick={onLogoutClick}
           onProfileClick={onProfileClick}
-          flashDeals={flashSalesProducts}
-            onOpenChat={onOpenChat}
+          onOpenChat={onOpenChat}
           onImageSearchClick={onImageSearchClick}
           orders={orders}
         />
@@ -337,7 +336,6 @@ const StoreHome: React.FC<StoreHomeProps> = ({
             onAddToCart={handleAddProductToCartFromCard}
             onCategoryClick={handleCategoryClick}
             onBrandClick={(slug) => handleCategoryClick(slug)}
-            flashDeals={flashSalesProducts}
             onOpenChat={onOpenChat}
           />
         </Suspense>
@@ -529,8 +527,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
 
       {/* Footer */}
       <Suspense fallback={<FooterSkeleton />}>
-        <StoreFooter websiteConfig={websiteConfig} logo={logo} flashDeals={flashSalesProducts}
-            onOpenChat={onOpenChat} />
+        <StoreFooter websiteConfig={websiteConfig} logo={logo} onOpenChat={onOpenChat} />
       </Suspense>
       
         </>
