@@ -254,6 +254,12 @@ tenantDataRouter.get('/:tenantId/store_studio_config', async (req, res, next) =>
       updatedAt: new Date().toISOString()
     };
     
+    // Prevent browser caching to ensure fresh data on reload
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     res.json({ data: config || defaultConfig });
   } catch (error) {
     console.error(`[TenantData] Error fetching store_studio_config:`, error);
@@ -305,6 +311,12 @@ tenantDataRouter.put('/:tenantId/store_studio_config', async (req, res, next) =>
       status: 'success'
     });
     
+    // Prevent browser caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     res.json({ data: config, success: true });
   } catch (error) {
     console.error(`[TenantData] Error updating store_studio_config:`, error);
@@ -365,6 +377,12 @@ tenantDataRouter.put('/:tenantId/product_display_order', async (req, res, next) 
       status: 'success'
     });
     
+    // Prevent browser caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     res.json({ data: existingConfig, success: true });
   } catch (error) {
     console.error(`[TenantData] Error updating product_display_order:`, error);

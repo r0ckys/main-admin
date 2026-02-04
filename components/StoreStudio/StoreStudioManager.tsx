@@ -40,7 +40,12 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
       setIsLoading(true);
       try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-        const response = await fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`);
+        const response = await fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         
         if (response.ok) {
           const data = await response.json();

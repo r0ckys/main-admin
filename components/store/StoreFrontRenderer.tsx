@@ -184,10 +184,14 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
 
       try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+        const fetchOptions = {
+          cache: 'no-store' as RequestCache,
+          headers: { 'Cache-Control': 'no-cache' }
+        };
         // Fetch both store studio config and layout in parallel
         const [configResponse, layoutResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`),
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`)
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, fetchOptions),
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`, fetchOptions)
         ]);
 
         // Check if store studio is enabled
