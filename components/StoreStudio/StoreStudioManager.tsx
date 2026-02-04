@@ -91,16 +91,20 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
 
   // Toggle store studio enabled/disabled
   const handleToggleEnabled = async () => {
-    const newEnabled = !config.enabled;
-    const newConfig = {
-      ...config,
-      enabled: newEnabled,
-      updatedAt: new Date().toISOString()
-    };
+    let previousConfig: StoreStudioConfig;
+    let newConfig: StoreStudioConfig;
     
-    // Store the previous config for proper revert
-    const previousConfig = config;
-    setConfig(newConfig);
+    // Use functional update to capture actual previous state
+    setConfig(prev => {
+      previousConfig = prev;
+      const newEnabled = !prev.enabled;
+      newConfig = {
+        ...prev,
+        enabled: newEnabled,
+        updatedAt: new Date().toISOString()
+      };
+      return newConfig;
+    });
     
     // Auto-save the toggle
     setIsSaving(true);
@@ -115,7 +119,7 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
       });
 
       if (response.ok) {
-        toast.success(`Store Studio ${newEnabled ? 'enabled' : 'disabled'}!`);
+        toast.success(`Store Studio ${newConfig.enabled ? 'enabled' : 'disabled'}!`);
       } else {
         throw new Error('Failed to save configuration');
       }

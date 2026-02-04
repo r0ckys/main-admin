@@ -218,7 +218,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
       if (key === 'store_studio_config' || key === 'store_layout') {
         console.log('[StoreHome] Detected update to', key, '- refetching...');
         
-        const refetchCustomLayout = async () => {
+        const refetchConfigAndLayout = async () => {
           try {
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
             const [configRes, layoutRes] = await Promise.all([
@@ -252,7 +252,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
           }
         };
 
-        refetchCustomLayout();
+        refetchConfigAndLayout();
       }
     });
 

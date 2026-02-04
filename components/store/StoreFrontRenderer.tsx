@@ -232,7 +232,7 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
       if (key === 'store_studio_config' || key === 'store_layout') {
         console.log('[StoreFrontRenderer] Detected update to', key, '- refetching...');
         
-        const refetchData = async () => {
+        const refetchConfigAndLayout = async () => {
           try {
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
             const [configResponse, layoutResponse] = await Promise.all([
@@ -265,7 +265,7 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
           }
         };
 
-        refetchData();
+        refetchConfigAndLayout();
       }
     });
 
