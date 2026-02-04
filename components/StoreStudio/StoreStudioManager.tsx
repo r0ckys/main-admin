@@ -6,6 +6,7 @@ import {
 import toast from 'react-hot-toast';
 import { StoreStudioConfig, Product } from '../../types';
 import { DataService } from '../../services/DataService';
+import { noCacheFetchOptions } from '../../utils/fetchHelpers';
 import ProductOrderManager from './ProductOrderManager';
 
 // Lazy load PageBuilder for the Layout tab
@@ -40,12 +41,7 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
       setIsLoading(true);
       try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-        const response = await fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
+        const response = await fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, noCacheFetchOptions);
         
         if (response.ok) {
           const data = await response.json();
