@@ -161,7 +161,7 @@ const SortableSectionItem: React.FC<{
 };
 
 // StorePreview Component
-const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: string | null; devicePreview: 'desktop' | 'tablet' | 'mobile'; onSelectSection: (id: string) => void }> = ({ sections, selectedSectionId, devicePreview, onSelectSection }) => {
+const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: string | null; devicePreview: 'desktop' | 'tablet' | 'mobile'; onSelectSection: (id: string) => void; tenantId?: string; hoverPreviewImage?: string | null }> = ({ sections, selectedSectionId, devicePreview, onSelectSection, tenantId, hoverPreviewImage }) => {
   const deviceWidths = { desktop: '100%', tablet: '768px', mobile: '375px' };
   const visibleSections = sections.filter(s => s.visible);
   
@@ -201,11 +201,12 @@ const StorePreview: React.FC<{ sections: PlacedSection[]; selectedSectionId: str
   };
   
   return (
-    <main className="flex-1 bg-gray-100 overflow-auto p-2 sm:p-4">
+    <main className="flex-1 bg-gray-100 overflow-auto p-2 sm:p-4 relative">
       <div className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all" style={{ maxWidth: deviceWidths[devicePreview], minHeight: 'calc(100vh - 140px)' }}>
         {visibleSections.map(section => <div key={section.id} onClick={() => onSelectSection(section.id)}>{renderSection(section)}</div>)}
         {visibleSections.length === 0 && <div className="flex flex-col items-center justify-center h-96 text-gray-400 p-4"><Icons.Layers /><p className="mt-4 text-center text-sm sm:text-base">Add sections to build your page</p></div>}
       </div>
+      {hoverPreviewImage && <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"><div className="bg-white rounded-xl shadow-2xl border-4 border-indigo-500 overflow-hidden max-w-2xl max-h-[80vh]"><img src={hoverPreviewImage} alt="Style Preview" className="w-full h-auto object-contain" /></div></div>}
     </main>
   );
 };
@@ -261,7 +262,7 @@ const SettingsField: React.FC<{
         <label className="text-sm text-gray-700 block mb-1">{label}</label>
         <div className="space-y-2">
           {value && (
-            <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
               <img 
                 src={value} 
                 alt={label} 
@@ -497,6 +498,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
   const [componentSearchQuery, setComponentSearchQuery] = useState<string>('');
   const [sidebarTab, setSidebarTab] = useState<'components' | 'sections'>('components');
   const [themeStyles, setThemeStyles] = useState<Record<string, string>>({});
+  const [hoverPreviewImage, setHoverPreviewImage] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const selectedSection = sections.find(s => s.id === selectedSectionId);
   const selectedBlock = selectedSection?.blocks.find(b => b.id === selectedBlockId);
@@ -825,6 +827,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
             <Icons.Settings />
           </button>
           
+          <button onClick={() => window.open(`https://${tenantId}.allinbangla.com`, "_blank")} className="px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2 transition bg-indigo-600 text-white hover:bg-indigo-700"><Icons.Eye /> <span className="hidden sm:inline">Preview</span></button>
           <button
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
@@ -911,6 +914,7 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
                 onSearchChange={setComponentSearchQuery}
                 onSelectStyle={handleSelectThemeStyle}
                 currentStyles={themeStyles}
+                onHoverPreview={setHoverPreviewImage}
               />
             )}
 
@@ -954,6 +958,8 @@ const PageBuilder: React.FC<PageBuilderProps> = ({ tenantId }) => {
                 setIsRightSidebarOpen(true);
               }
             }}
+            tenantId={tenantId}
+            hoverPreviewImage={hoverPreviewImage}
           />
         </DndContext>
 

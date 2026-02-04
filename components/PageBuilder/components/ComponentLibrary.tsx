@@ -7,6 +7,7 @@ interface ComponentLibraryProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   currentStyles?: Record<string, string>;
+  onHoverPreview?: (thumbnail: string | null) => void;
 }
 
 // Category Icons
@@ -49,8 +50,8 @@ const VariantPreviewCard: React.FC<{
   onSelectStyle?: () => void;
   isSelected?: boolean;
   isStyleSelector?: boolean;
-}> = ({ variant, onAdd, onSelectStyle, isSelected, isStyleSelector }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  onHoverPreview?: (thumbnail: string | null) => void;
+}> = ({ variant, onAdd, onSelectStyle, isSelected, isStyleSelector, onHoverPreview }) => {
   const [imageError, setImageError] = useState(false);
   
   const handleClick = () => {
@@ -60,12 +61,24 @@ const VariantPreviewCard: React.FC<{
       onAdd();
     }
   };
+
+  const handleMouseEnter = () => {
+    if (variant.thumbnail && onHoverPreview) {
+      onHoverPreview(variant.thumbnail);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (onHoverPreview) {
+      onHoverPreview(null);
+    }
+  };
   
   return (
     <div 
       className={`relative cursor-pointer transition-all ${isSelected ? 'ring-2 ring-indigo-500 rounded-lg' : ''}`}
-      onMouseEnter={() => setIsHovered(true)} 
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
       <div className={`border rounded-lg overflow-hidden transition-all bg-white ${isSelected ? 'border-indigo-500 shadow-lg' : 'border-gray-200 hover:border-indigo-400 hover:shadow-md'}`}>
@@ -85,18 +98,6 @@ const VariantPreviewCard: React.FC<{
             </div>
           )}
           
-          {/* Hover overlay */}
-          {isHovered && !isSelected && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity">
-              <button 
-                className="p-2 bg-white rounded-full shadow-lg hover:bg-indigo-50 hover:scale-110 transition-all"
-                title={isStyleSelector ? "Select style" : "Add section"}
-              >
-                {isStyleSelector ? <CheckIcon /> : <PlusIcon />}
-              </button>
-            </div>
-          )}
-          
           {/* Selected indicator */}
           {isSelected && (
             <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white">
@@ -108,7 +109,6 @@ const VariantPreviewCard: React.FC<{
         {/* Variant Name */}
         <div className="px-2 py-1.5 border-t border-gray-100">
           <span className="text-xs font-medium text-gray-700 block truncate">{variant.name}</span>
-          <span className="text-[10px] text-gray-500 block truncate">{variant.description}</span>
         </div>
       </div>
     </div>
@@ -124,7 +124,8 @@ const CategoryAccordion: React.FC<{
   onSelectStyle?: (variant: SectionVariant) => void;
   currentStyles?: Record<string, string>;
   searchQuery: string;
-}> = ({ category, isExpanded, onToggle, onAddVariant, onSelectStyle, currentStyles, searchQuery }) => {
+  onHoverPreview?: (thumbnail: string | null) => void;
+}> = ({ category, isExpanded, onToggle, onAddVariant, onSelectStyle, currentStyles, searchQuery, onHoverPreview }) => {
   const filteredVariants = searchQuery
     ? category.variants.filter(v => 
         v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -161,11 +162,11 @@ const CategoryAccordion: React.FC<{
             {CategoryIcons[category.icon] || CategoryIcons['layers']}
           </span>
           <div className="text-left">
-            <span className={`font-semibold ${isExpanded ? 'text-indigo-700' : 'text-gray-800'}`}>
+            <span className={`font-semibold text-sm ${isExpanded ? 'text-indigo-700' : 'text-gray-800'}`}>
               {category.name}
             </span>
             <span className="text-xs text-gray-400 ml-2">
-              {filteredVariants.length} variant{filteredVariants.length !== 1 ? 's' : ''}
+              {filteredVariants.length} variants
             </span>
           </div>
         </div>
@@ -183,7 +184,7 @@ const CategoryAccordion: React.FC<{
               </span>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {filteredVariants.map((variant) => (
               <VariantPreviewCard 
                 key={variant.id} 
@@ -192,6 +193,7 @@ const CategoryAccordion: React.FC<{
                 onSelectStyle={onSelectStyle ? () => onSelectStyle(variant) : undefined}
                 isSelected={selectedStyleId === variant.id}
                 isStyleSelector={hasThemeStyles}
+                onHoverPreview={onHoverPreview}
               />
             ))}
           </div>
@@ -207,7 +209,8 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
   onSelectStyle,
   searchQuery, 
   onSearchChange,
-  currentStyles
+  currentStyles,
+  onHoverPreview
 }) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>('header');
 
@@ -268,7 +271,8 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
             onAddVariant={handleAddVariant}
             onSelectStyle={handleSelectStyle}
             currentStyles={currentStyles}
-            searchQuery={searchQuery} 
+            searchQuery={searchQuery}
+            onHoverPreview={onHoverPreview}
           />
         ))}
         
