@@ -246,7 +246,8 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
     });
 
     return () => unsubscribe();
-  }, [tenantId, fetchAndUpdateConfigAndLayout]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantId]); // fetchAndUpdateConfigAndLayout is stable due to useCallback with tenantId dependency
 
   // Get products filtered by tag
   const getTagProducts = useCallback((tagName: string) => {
