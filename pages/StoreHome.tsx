@@ -158,7 +158,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
   const [useCustomLayout, setUseCustomLayout] = useState(false);
   const [customLayoutLoading, setCustomLayoutLoading] = useState(true);
 
-  // Check if tenant has a custom layout saved
+  // Check if tenant has store studio enabled and a custom layout saved
   useEffect(() => {
     const checkCustomLayout = async () => {
       if (!tenantId) {
@@ -166,16 +166,33 @@ const StoreHome: React.FC<StoreHomeProps> = ({
         return;
       }
       try {
-        const res = await fetch(`/api/tenant-data/${tenantId}/store_layout`);
-        if (res.ok) {
-          const result = await res.json();
-          if (result.data?.sections?.length > 0) {
+        // Check both store studio config and layout in parallel
+        const [configRes, layoutRes] = await Promise.all([
+          fetch(`/api/tenant-data/${tenantId}/store_studio_config`),
+          fetch(`/api/tenant-data/${tenantId}/store_layout`)
+        ]);
+        
+        // Only use custom layout if store studio is enabled AND layout exists
+        if (configRes.ok && layoutRes.ok) {
+          const [configResult, layoutResult] = await Promise.all([
+            configRes.json(),
+            layoutRes.json()
+          ]);
+          
+          const isStoreStudioEnabled = configResult.data?.enabled || false;
+          const hasCustomLayout = layoutResult.data?.sections?.length > 0;
+          
+          if (isStoreStudioEnabled && hasCustomLayout) {
             setUseCustomLayout(true);
-            console.log("[StoreHome] Using custom layout from Page Builder");
+            console.log("[StoreHome] Using custom layout from Store Studio");
+          } else if (!isStoreStudioEnabled) {
+            console.log("[StoreHome] Store Studio is disabled, using default layout");
+          } else {
+            console.log("[StoreHome] No custom layout, using default");
           }
         }
       } catch (e) {
-        console.log("[StoreHome] No custom layout, using default");
+        console.log("[StoreHome] Error checking layout, using default:", e);
       }
       setCustomLayoutLoading(false);
     };
