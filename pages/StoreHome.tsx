@@ -228,8 +228,7 @@ const StoreHome: React.FC<StoreHomeProps> = ({
     });
 
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenantId]); // checkAndUpdateCustomLayout is stable due to useCallback with tenantId dependency
+  }, [tenantId, checkAndUpdateCustomLayout]);
 
   // === HANDLERS ===
   const selectInstantVariant = useCallback((product: Product): ProductVariantSelection => ({
