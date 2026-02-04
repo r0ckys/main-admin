@@ -193,31 +193,31 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-4 md:h-16 md:py-0">
+            <div className="flex items-center gap-2 sm:gap-4">
               {onBack && (
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                   title="Back to Dashboard"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
               )}
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Store className="w-6 h-6 text-blue-600" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                  <Store className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Store Studio</h1>
-                  <p className="text-sm text-gray-500">Design your store without code</p>
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Store Studio</h1>
+                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Design your store without code</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               {/* Enable/Disable Toggle */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center sm:justify-start gap-3">
                 <span className="text-sm font-medium text-gray-700">
                   {config.enabled ? 'Enabled' : 'Disabled'}
                 </span>
@@ -245,7 +245,7 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
               <button
                 onClick={handleSaveConfig}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
               >
                 {isSaving ? (
                   <>
@@ -263,10 +263,10 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 border-t border-gray-200 -mb-px">
+          <div className="flex gap-1 border-t border-gray-200 -mb-px overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'settings'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -279,7 +279,7 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('layout')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'layout'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -287,12 +287,12 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Layout className="w-4 h-4" />
-                <span>Layout Builder</span>
+                <span className="whitespace-nowrap">Layout Builder</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'products'
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -300,7 +300,7 @@ export const StoreStudioManager: React.FC<StoreStudioManagerProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Grid className="w-4 h-4" />
-                <span>Product Order</span>
+                <span className="whitespace-nowrap">Product Order</span>
               </div>
             </button>
           </div>

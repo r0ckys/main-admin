@@ -33,17 +33,17 @@ const SortableProductItem: React.FC<SortableProductItemProps> = ({ product, inde
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
     >
       <button
         {...attributes}
         {...listeners}
-        className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+        className="p-1 sm:p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing flex-shrink-0"
       >
-        <GripVertical className="w-5 h-5" />
+        <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">
+      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
@@ -57,21 +57,21 @@ const SortableProductItem: React.FC<SortableProductItemProps> = ({ product, inde
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0">
             #{index + 1}
           </span>
-          <h3 className="text-sm font-medium text-gray-900 truncate">{product.name}</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</h3>
         </div>
-        <p className="text-sm text-gray-500 mt-0.5">
-          ${product.price.toFixed(2)} · ID: {product.id}
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">
+          ${product.price.toFixed(2)}<span className="hidden sm:inline"> · ID: {product.id}</span>
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         {product.status === 'Active' ? (
-          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">Active</span>
+          <span className="text-xs px-1.5 sm:px-2 py-1 bg-green-100 text-green-700 rounded whitespace-nowrap">Active</span>
         ) : (
-          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">Inactive</span>
+          <span className="text-xs px-1.5 sm:px-2 py-1 bg-gray-100 text-gray-600 rounded whitespace-nowrap">Inactive</span>
         )}
       </div>
     </div>
@@ -197,15 +197,15 @@ export const ProductOrderManager: React.FC<ProductOrderManagerProps> = ({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold text-gray-900">Manage Product Order</h2>
           <p className="text-sm text-gray-600 mt-1">
             Drag and drop products to change their display order in your store
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {hasChanges && (
             <button
               onClick={handleReset}
@@ -217,7 +217,7 @@ export const ProductOrderManager: React.FC<ProductOrderManagerProps> = ({
           <button
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             {isSaving ? (
               <>
@@ -236,8 +236,8 @@ export const ProductOrderManager: React.FC<ProductOrderManagerProps> = ({
 
       {/* Status Banner */}
       {hasChanges && (
-        <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-yellow-600" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
           <p className="text-sm text-yellow-900">
             You have unsaved changes. Click "Save Order" to apply the new product order.
           </p>
