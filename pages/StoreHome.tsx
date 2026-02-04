@@ -186,10 +186,14 @@ const StoreHome: React.FC<StoreHomeProps> = ({
           if (isStoreStudioEnabled && hasCustomLayout) {
             setUseCustomLayout(true);
             console.log("[StoreHome] Using custom layout from Store Studio");
-          } else if (!isStoreStudioEnabled) {
-            console.log("[StoreHome] Store Studio is disabled, using default layout");
           } else {
-            console.log("[StoreHome] No custom layout, using default");
+            // Explicitly set to false when Store Studio is disabled or no layout exists
+            setUseCustomLayout(false);
+            if (!isStoreStudioEnabled) {
+              console.log("[StoreHome] Store Studio is disabled, using default layout");
+            } else {
+              console.log("[StoreHome] No custom layout, using default");
+            }
           }
         }
       } catch (e) {
@@ -336,7 +340,10 @@ const StoreHome: React.FC<StoreHomeProps> = ({
       )}
       
       {/* Conditional: Custom Layout vs Default Layout */}
-      {useCustomLayout ? (
+      {customLayoutLoading ? (
+        // Show loading skeleton while checking Store Studio status
+        <StoreHomeSkeleton />
+      ) : useCustomLayout ? (
         <Suspense fallback={<StoreHomeSkeleton />}>
           <StoreFrontRenderer
             tenantId={tenantId || ""}
