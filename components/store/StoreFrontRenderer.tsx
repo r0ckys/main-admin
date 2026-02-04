@@ -17,6 +17,7 @@ import {
   ProductGridSkeleton,
 } from './skeletons';
 import type { Product, WebsiteConfig } from '../../types';
+import { noCacheFetchOptions } from '../../utils/fetchHelpers';
 
 // Lazy loaded sections
 const FlashSalesSection = lazy(() => import('./FlashSalesSection').then(m => ({ default: m.FlashSalesSection })));
@@ -186,8 +187,8 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
         // Fetch both store studio config and layout in parallel
         const [configResponse, layoutResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`),
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`)
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, noCacheFetchOptions),
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`, noCacheFetchOptions)
         ]);
 
         // Check if store studio is enabled

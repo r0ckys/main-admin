@@ -1,6 +1,7 @@
 
 import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
 import type { Product, User, WebsiteConfig, Order, ProductVariantSelection } from '../types';
+import { noCacheFetchOptions } from '../utils/fetchHelpers';
 
 // Custom hook with all business logic
 import { useStoreHome, formatSegment } from '../hooks/useStoreHome';
@@ -169,8 +170,8 @@ const StoreHome: React.FC<StoreHomeProps> = ({
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
         // Check both store studio config and layout in parallel
         const [configRes, layoutRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`),
-          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`)
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`, noCacheFetchOptions),
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`, noCacheFetchOptions)
         ]);
         
         // Only use custom layout if store studio is enabled AND layout exists

@@ -242,6 +242,13 @@ tenantDataRouter.get('/:tenantId/store_studio_config', async (req, res, next) =>
       return res.status(400).json({ error: 'tenantId is required' });
     }
     
+    // Prevent browser caching to ensure fresh data on reload
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
     const tenantId = await resolveTenantId(rawTenantId);
     const config = await getTenantData(tenantId, 'store_studio_config');
     
@@ -268,6 +275,13 @@ tenantDataRouter.put('/:tenantId/store_studio_config', async (req, res, next) =>
     if (!rawTenantId) {
       return res.status(400).json({ error: 'tenantId is required' });
     }
+    
+    // Prevent browser caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     
     const tenantId = await resolveTenantId(rawTenantId);
     const config = req.body;
@@ -319,6 +333,13 @@ tenantDataRouter.put('/:tenantId/product_display_order', async (req, res, next) 
     if (!rawTenantId) {
       return res.status(400).json({ error: 'tenantId is required' });
     }
+    
+    // Prevent browser caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     
     const tenantId = await resolveTenantId(rawTenantId);
     const { productDisplayOrder } = req.body;
