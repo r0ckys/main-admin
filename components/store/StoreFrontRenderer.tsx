@@ -183,10 +183,11 @@ export const StoreFrontRenderer: React.FC<StoreFrontRendererProps> = ({
       }
 
       try {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
         // Fetch both store studio config and layout in parallel
         const [configResponse, layoutResponse] = await Promise.all([
-          fetch(`/api/tenant-data/${tenantId}/store_studio_config`),
-          fetch(`/api/tenant-data/${tenantId}/store_layout`)
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_studio_config`),
+          fetch(`${API_BASE_URL}/api/tenant-data/${tenantId}/store_layout`)
         ]);
 
         // Check if store studio is enabled
