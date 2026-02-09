@@ -50,29 +50,29 @@ const FigmaTopProducts: React.FC<FigmaTopProductsProps> = ({
 }) => {
   return (
     <div 
-      className="bg-white rounded-xl p-6 h-full"
+      className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 h-full hover:shadow-lg transition-shadow duration-300"
       style={{ 
         boxShadow: '0px 2px 9.6px rgba(0, 0, 0, 0.08)',
         fontFamily: 'Poppins, sans-serif'
       }}
     >
       {/* Header */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-zinc-800">Top Products</h3>
-          <span className="text-sm text-sky-400 cursor-pointer hover:text-sky-500 transition-colors">
+      <div className="mb-3 sm:mb-4 md:mb-5 lg:mb-6">
+        <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4 lg:mb-5">
+          <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-semibold text-zinc-800">Top Products</h3>
+          <span className="text-xs sm:text-sm lg:text-base text-sky-400 cursor-pointer hover:text-sky-500 hover:underline transition-all">
             All product
           </span>
         </div>
         
         {/* Search Bar */}
         <div className="relative">
-          <div className="flex items-center bg-zinc-100 rounded-lg px-3 py-2.5">
+          <div className="flex items-center bg-zinc-100 rounded-md sm:rounded-lg lg:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 md:py-2.5 lg:py-3 focus-within:ring-2 focus-within:ring-sky-200 transition-all">
             <SearchIcon />
             <input
               type="text"
               placeholder="Search"
-              className="bg-transparent flex-1 text-sm text-zinc-700 placeholder-zinc-400 focus:outline-none ml-2"
+              className="bg-transparent flex-1 text-xs sm:text-sm lg:text-base text-zinc-700 placeholder-zinc-400 focus:outline-none ml-1.5 sm:ml-2 lg:ml-3"
               style={{ fontFamily: 'Lato, sans-serif' }}
             />
           </div>
@@ -80,31 +80,31 @@ const FigmaTopProducts: React.FC<FigmaTopProductsProps> = ({
       </div>
 
       {/* Products List */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3 lg:space-y-4">
         {products.map((product) => (
           <div 
             key={product.id} 
-            className="flex items-center gap-3 p-2 hover:bg-zinc-50 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-2 sm:gap-3 lg:gap-4 p-1.5 sm:p-2 lg:p-3 hover:bg-zinc-50 rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-200 cursor-pointer group"
           >
             {/* Product Image */}
-            <div className="w-12 h-12 bg-zinc-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-zinc-100 rounded-md sm:rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:shadow-md transition-shadow">
               {product.image ? (
                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
               ) : (
-                <span className="text-sm text-zinc-400 font-medium">{product.name.charAt(0)}</span>
+                <span className="text-xs sm:text-sm lg:text-base text-zinc-400 font-medium">{product.name.charAt(0)}</span>
               )}
             </div>
             
             {/* Product Info */}
             <div className="flex-1 min-w-0">
               <h4 
-                className="text-sm font-medium text-zinc-700 truncate"
+                className="text-xs sm:text-sm lg:text-base font-medium text-zinc-700 truncate group-hover:text-blue-600 transition-colors"
                 style={{ fontFamily: 'Lato, sans-serif' }}
               >
                 {product.name}
               </h4>
               <p 
-                className="text-xs text-zinc-500 mt-0.5"
+                className="text-[10px] sm:text-xs lg:text-sm text-zinc-500 mt-0.5"
                 style={{ fontFamily: 'Lato, sans-serif' }}
               >
                 Item: {product.itemCode}
@@ -113,7 +113,7 @@ const FigmaTopProducts: React.FC<FigmaTopProductsProps> = ({
             
             {/* Price */}
             <div 
-              className="text-sm font-semibold text-zinc-800"
+              className="text-xs sm:text-sm lg:text-base font-semibold text-zinc-800 shrink-0 group-hover:text-green-600 transition-colors"
               style={{ fontFamily: 'Lato, sans-serif' }}
             >
               {product.price}

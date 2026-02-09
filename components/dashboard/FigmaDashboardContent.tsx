@@ -69,7 +69,7 @@ const FigmaDashboardContent: React.FC<FigmaDashboardContentProps> = ({
   }));
 
   return (
-    <div className="space-y-6 p-6 bg-[#F8FAFC] min-h-full">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6 bg-[#F8FAFC] min-h-full">
       {/* Overview Section */}
       <FigmaOverview
         stats={{
@@ -84,7 +84,7 @@ const FigmaDashboardContent: React.FC<FigmaDashboardContentProps> = ({
       />
 
       {/* Visitor Stats + Analytics Bar Chart Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Visitor Stats - Left Side */}
         <div className="lg:col-span-4">
           <FigmaVisitorStats
@@ -118,7 +118,7 @@ const FigmaDashboardContent: React.FC<FigmaDashboardContentProps> = ({
       />
 
       {/* Sales Performance + Sales by Category Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Sales Performance Chart - Left Side */}
         <div className="lg:col-span-8">
           <FigmaSalesPerformance />
@@ -131,7 +131,7 @@ const FigmaDashboardContent: React.FC<FigmaDashboardContentProps> = ({
       </div>
 
       {/* Best Selling Products + Top Products Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Best Selling Products Table - Left Side */}
         <div className="lg:col-span-8">
           <FigmaBestSellingProducts products={bestSellingData} />

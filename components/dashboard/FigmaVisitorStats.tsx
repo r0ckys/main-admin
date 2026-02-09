@@ -47,47 +47,50 @@ const VisitorCard: React.FC<VisitorCardProps> = ({
     blue: {
       bgClass: 'bg-blue-50',
       circleClass: 'bg-blue-200/50',
-      titleColor: '#008DFF'
+      titleColor: '#008DFF',
+      hoverBorder: 'hover:border-blue-200'
     },
     orange: {
       bgClass: 'bg-orange-50',
       circleClass: 'bg-orange-200/50',
-      titleColor: '#FF5500'
+      titleColor: '#FF5500',
+      hoverBorder: 'hover:border-orange-200'
     },
     purple: {
       bgClass: 'bg-purple-50',
       circleClass: 'bg-purple-200/50',
-      titleColor: '#3F34BE'
+      titleColor: '#3F34BE',
+      hoverBorder: 'hover:border-purple-200'
     }
   };
 
   const config = themes[theme];
 
   return (
-    <div className={`relative overflow-hidden rounded-xl ${config.bgClass} p-4`}>
+    <div className={`relative overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl ${config.bgClass} p-2.5 sm:p-3 md:p-4 lg:p-5 border border-transparent ${config.hoverBorder} hover:shadow-lg transition-all duration-300 cursor-pointer group`}>
       {/* Background decorative circle */}
       <div 
-        className={`absolute w-40 h-40 rounded-full ${config.circleClass}`}
-        style={{ right: '-30px', top: '-60px' }}
+        className={`absolute w-28 sm:w-36 md:w-40 lg:w-48 h-28 sm:h-36 md:h-40 lg:h-48 rounded-full ${config.circleClass} group-hover:scale-110 transition-transform duration-500`}
+        style={{ right: '-20px', top: '-40px' }}
       />
       
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="relative z-10 flex items-center justify-between gap-2 lg:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
           {/* Icon */}
-          <div className="w-8 h-8 flex items-center justify-center">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 flex items-center justify-center shrink-0">
             {icon}
           </div>
           
           {/* Text */}
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <span
-              className="text-sm font-medium"
+              className="text-xs sm:text-sm lg:text-base font-medium truncate"
               style={{ color: config.titleColor, fontFamily: 'Poppins, sans-serif' }}
             >
               {title}
             </span>
             <span
-              className="text-xs text-gray-600"
+              className="text-[10px] sm:text-xs lg:text-sm text-gray-600 truncate"
               style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               {subtitle}
@@ -97,7 +100,7 @@ const VisitorCard: React.FC<VisitorCardProps> = ({
         
         {/* Value */}
         <span
-          className="text-2xl font-semibold text-gray-900"
+          className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 shrink-0 group-hover:scale-105 transition-transform"
           style={{ fontFamily: 'Poppins, sans-serif' }}
         >
           {value}
@@ -127,12 +130,12 @@ const FigmaVisitorStats: React.FC<FigmaVisitorStatsProps> = ({
   }
 }) => {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="grid grid-cols-3 md:grid-cols-1 gap-2 sm:gap-3">
       {/* Online Now - Blue theme */}
       <VisitorCard
         icon={<OnlineNowIcon />}
         title="Online Now"
-        subtitle="Active visitors on site"
+        subtitle="Active visitors"
         value={visitorStats.onlineNow || 35}
         theme="blue"
       />

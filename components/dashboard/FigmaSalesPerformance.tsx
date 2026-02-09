@@ -47,37 +47,37 @@ const FigmaSalesPerformance: React.FC<FigmaSalesPerformanceProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-[10px] p-2.5 flex flex-col gap-2.5"
+      className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl p-2 sm:p-3 md:p-4 lg:p-5 xl:p-6 flex flex-col gap-2 sm:gap-2.5 lg:gap-4 hover:shadow-lg transition-shadow duration-300"
       style={{ 
         outline: '0.5px solid rgba(0, 0, 0, 0.1)',
         fontFamily: 'Lato, sans-serif'
       }}
     >
       {/* Header with filters */}
-      <div className="flex justify-between items-center">
-        <div className="text-zinc-800 text-lg font-bold" style={{ fontFamily: 'Lato, sans-serif' }}>
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-2 lg:gap-4">
+        <div className="text-zinc-800 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold" style={{ fontFamily: 'Lato, sans-serif' }}>
           Sale Performance
         </div>
-        <div className="flex items-center gap-2">
-          {['Day', 'Month', 'Year', 'All Time'].map((filter) => (
+        <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 flex-wrap">
+          {['Day', 'Month', 'Year', 'All'].map((filter) => (
             <button
               key={filter}
               onClick={() => handleFilterChange(filter)}
-              className={`w-16 px-2 py-1 rounded-lg flex justify-center items-center text-sm font-medium ${
+              className={`px-2 sm:px-2.5 md:px-3 lg:px-4 lg:w-auto py-0.5 sm:py-1 lg:py-1.5 rounded-md sm:rounded-lg flex justify-center items-center text-[10px] sm:text-xs md:text-sm lg:text-base font-medium transition-all hover:shadow-sm ${
                 activeFilter === filter
-                  ? 'bg-gradient-to-b from-orange-500 to-amber-500 text-white'
-                  : 'bg-stone-50 text-neutral-400'
+                  ? 'bg-gradient-to-b from-orange-500 to-amber-500 text-white shadow-md'
+                  : 'bg-stone-50 text-neutral-400 hover:bg-stone-100'
               }`}
               style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               {filter}
             </button>
           ))}
-          <div className="px-3 py-1.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg flex items-center gap-2">
-            <span className="text-white text-sm font-normal" style={{ fontFamily: 'Lato, sans-serif' }}>
+          <div className="px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 bg-gradient-to-r from-sky-400 to-blue-500 rounded-md sm:rounded-lg flex items-center gap-1 sm:gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+            <span className="text-white text-[10px] sm:text-xs md:text-sm lg:text-base font-normal truncate max-w-[70px] sm:max-w-none" style={{ fontFamily: 'Lato, sans-serif' }}>
               December 2025
             </span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 shrink-0">
               <path d="M2 5L10 10L2 15" fill="white" transform="rotate(90 10 10)"/>
             </svg>
           </div>
@@ -85,20 +85,20 @@ const FigmaSalesPerformance: React.FC<FigmaSalesPerformanceProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4">
-        <span className="text-sky-400 text-sm font-bold" style={{ fontFamily: 'Poppins, sans-serif' }}>Placed Order</span>
-        <span className="text-orange-500 text-sm font-bold" style={{ fontFamily: 'Poppins, sans-serif' }}>Order Delivered</span>
-        <span className="text-red-700 text-sm font-bold" style={{ fontFamily: 'Poppins, sans-serif' }}>Order Cancel</span>
+      <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+        <span className="text-sky-400 text-[10px] sm:text-xs md:text-sm lg:text-base font-bold cursor-pointer hover:opacity-70 transition-opacity" style={{ fontFamily: 'Poppins, sans-serif' }}>Placed Order</span>
+        <span className="text-orange-500 text-[10px] sm:text-xs md:text-sm lg:text-base font-bold cursor-pointer hover:opacity-70 transition-opacity" style={{ fontFamily: 'Poppins, sans-serif' }}>Order Delivered</span>
+        <span className="text-red-700 text-[10px] sm:text-xs md:text-sm lg:text-base font-bold cursor-pointer hover:opacity-70 transition-opacity" style={{ fontFamily: 'Poppins, sans-serif' }}>Order Cancel</span>
       </div>
 
       {/* Chart */}
-      <div className="relative h-48">
+      <div className="relative h-32 sm:h-40 md:h-44 lg:h-52 xl:h-60">
         {/* Y-axis labels */}
         <div className="absolute left-0 top-0 h-full flex flex-col justify-between">
           {[100, 75, 50, 25, 0].map((val) => (
             <span 
               key={val} 
-              className="w-6 h-9 opacity-50 text-right text-neutral-900 text-[10px] font-medium"
+              className="w-4 sm:w-5 md:w-6 lg:w-8 h-6 sm:h-8 md:h-9 lg:h-10 opacity-50 text-right text-neutral-900 text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs font-medium"
               style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               {val}
@@ -107,12 +107,12 @@ const FigmaSalesPerformance: React.FC<FigmaSalesPerformanceProps> = ({
         </div>
         
         {/* Chart area */}
-        <div className="ml-8 h-full relative">
+        <div className="ml-5 sm:ml-6 md:ml-8 lg:ml-10 h-full relative">
           {/* Grid lines */}
           {[0, 1, 2, 3, 4].map((i) => (
             <div 
               key={i} 
-              className="absolute w-full border-t border-zinc-300" 
+              className="absolute w-full border-t border-zinc-200" 
               style={{ top: `${i * 25}%` }} 
             />
           ))}
@@ -124,32 +124,35 @@ const FigmaSalesPerformance: React.FC<FigmaSalesPerformanceProps> = ({
               d={createSmoothPath(data.map(d => d.placedOrder), 700, 180)}
               fill="none"
               stroke="#38BDF8"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              className="hover:stroke-[3] transition-all"
             />
             {/* Order Delivered (orange-500) */}
             <path
               d={createSmoothPath(data.map(d => d.delivered), 700, 180)}
               fill="none"
               stroke="#F97316"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              className="hover:stroke-[3] transition-all"
             />
             {/* Order Cancel (red-700) */}
             <path
               d={createSmoothPath(data.map(d => d.canceled), 700, 180)}
               fill="none"
               stroke="#B91C1C"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              className="hover:stroke-[3] transition-all"
             />
           </svg>
         </div>
       </div>
 
       {/* X-axis labels */}
-      <div className="ml-8 flex justify-between">
+      <div className="ml-5 sm:ml-6 md:ml-8 lg:ml-10 flex justify-between overflow-x-auto">
         {Array.from({ length: 31 }, (_, i) => (
           <span 
             key={i}
-            className="opacity-50 text-neutral-900 text-[10px] font-medium"
+            className="opacity-50 text-neutral-900 text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-medium"
             style={{ fontFamily: 'Poppins, sans-serif' }}
           >
             {i + 1}

@@ -86,15 +86,19 @@ const topProducts = [
 ];
 
 const OrderAnalyticsCard: React.FC<StatCard> = ({ label, value, icon, iconBg }) => (
-  <div className="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-shadow">
-    <div className="flex items-start justify-between">
-      <div className={`w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center`}>
-        {icon}
+  <div className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 border border-gray-100 hover:shadow-md transition-shadow">
+    <div className="flex items-center sm:items-start gap-2 sm:gap-0 sm:justify-between">
+      <div className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-md sm:rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
+        {React.cloneElement(icon as React.ReactElement, { className: 'w-4 h-4 sm:w-5 sm:h-5' })}
+      </div>
+      <div className="sm:hidden flex-1 min-w-0">
+        <p className="text-lg font-bold text-gray-900 truncate">{value}</p>
+        <p className="text-xs text-gray-500 truncate">{label}</p>
       </div>
     </div>
-    <div className="mt-3">
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
+    <div className="hidden sm:block mt-2 md:mt-3">
+      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{value}</p>
+      <p className="text-xs sm:text-sm text-gray-500 mt-0.5 md:mt-1 truncate">{label}</p>
     </div>
   </div>
 );
@@ -102,22 +106,22 @@ const OrderAnalyticsCard: React.FC<StatCard> = ({ label, value, icon, iconBg }) 
 const VisitorStatCard: React.FC<{ label: string; value: string; change: string; isPositive: boolean }> = ({
   label, value, change, isPositive
 }) => (
-  <div className="bg-white rounded-xl p-4 border border-gray-100">
-    <div className="flex items-center justify-between">
-      <p className="text-sm text-gray-500">{label}</p>
-      <span className={`flex items-center text-xs font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+  <div className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 border border-gray-100">
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-xs sm:text-sm text-gray-500 truncate">{label}</p>
+      <span className={`flex items-center text-xs font-medium shrink-0 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
         {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
         {change}
       </span>
     </div>
-    <p className="text-xl font-bold text-gray-900 mt-2">{value}</p>
+    <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mt-1 sm:mt-2">{value}</p>
   </div>
 );
 
 const OrderStatusPill: React.FC<OrderStatus> = ({ label, count, color }) => (
-  <div className={`px-4 py-3 rounded-xl text-center ${color}`}>
-    <p className="text-lg font-bold">{count}</p>
-    <p className="text-xs mt-1">{label}</p>
+  <div className={`px-2 py-2 sm:px-3 sm:py-2.5 md:px-4 md:py-3 rounded-lg sm:rounded-xl text-center ${color}`}>
+    <p className="text-sm sm:text-base md:text-lg font-bold">{count}</p>
+    <p className="text-[11px] sm:text-xs mt-0.5 sm:mt-1 truncate">{label}</p>
   </div>
 );
 
@@ -149,206 +153,226 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ orders = [], products =
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Order Analytics</h2>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-5 lg:p-6">
+      {/* Order Analytics Section */}
+      <div className="mb-4 sm:mb-5 md:mb-6">
+        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-3 mb-3 sm:mb-4">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Order Analytics</h2>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div className="flex items-center bg-gray-100 rounded-md sm:rounded-lg p-0.5 sm:p-1">
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${language === 'en' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}
+                className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md transition-colors ${language === 'en' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}
               >Eng</button>
               <button
                 onClick={() => setLanguage('bn')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${language === 'bn' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}
+                className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md transition-colors ${language === 'bn' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}
               >বাংলা</button>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{currentDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}</span>
-              <span className="text-gray-400">|</span>
-              <span>{currentDate.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+              <span className="text-gray-400 hidden xs:inline">|</span>
+              <span className="hidden xs:inline">{currentDate.toLocaleDateString('en-US', { weekday: 'short' })}</span>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Analytics Cards Grid - Responsive */}
+        <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
           {analyticsCards.map((card) => (
             <OrderAnalyticsCard key={card.id} {...card} />
           ))}
-          <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-4 text-white col-span-1">
-            <div className="flex items-center justify-between mb-2">
-              <Bell className="w-5 h-5" />
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">New</span>
+          <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 text-white">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-[11px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 rounded-full">New</span>
             </div>
-            <p className="text-sm font-medium">Important</p>
-            <p className="text-xs opacity-80 mt-1">Notification</p>
+            <p className="text-xs sm:text-sm font-medium">Important</p>
+            <p className="text-[11px] sm:text-xs opacity-80 mt-0.5 sm:mt-1">Notification</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="col-span-12 md:col-span-3 space-y-4">
+      {/* Visitor Stats Section */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-4 sm:mb-5 md:mb-6">
+        {/* Visitor Stat Cards - Stack on mobile, inline on larger */}
+        <div className="col-span-12 md:col-span-3 grid grid-cols-3 md:grid-cols-1 gap-2 sm:gap-3 md:gap-4">
           <VisitorStatCard label="Online Now" value="127" change="+12%" isPositive={true} />
           <VisitorStatCard label="Today visitors" value="1,842" change="+8%" isPositive={true} />
           <VisitorStatCard label="Total visitors" value="45,231" change="+15%" isPositive={true} />
         </div>
         
-        <div className="col-span-12 md:col-span-9 bg-white rounded-xl p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Units of Measure</h3>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                <span className="text-gray-600">Mobile View</span>
+        {/* Chart Area */}
+        <div className="col-span-12 md:col-span-9 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100">
+          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900">Units of Measure</h3>
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full" />
+                <span className="text-gray-600">Mobile</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full" />
-                <span className="text-gray-600">Tab View</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full" />
+                <span className="text-gray-600">Tab</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full" />
-                <span className="text-gray-600">Desktop View</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full" />
+                <span className="text-gray-600">Desktop</span>
               </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={visitorData} barGap={4}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip />
-              <Bar dataKey="mobile" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="tablet" fill="#22c55e" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="desktop" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-40 sm:h-48 md:h-52 lg:h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={visitorData} barGap={2}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" interval="preserveStartEnd" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" width={30} />
+                <Tooltip />
+                <Bar dataKey="mobile" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="tablet" fill="#22c55e" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="desktop" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Order</h3>
-        <div className="grid grid-cols-6 gap-4">
+      {/* Order Status Section */}
+      <div className="mb-4 sm:mb-5 md:mb-6">
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3 md:mb-4">Order</h3>
+        <div className="grid grid-cols-3 xs:grid-cols-6 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
           {orderStatuses.map((status) => (
             <OrderStatusPill key={status.id} {...status} />
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="col-span-12 lg:col-span-8 bg-white rounded-xl p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Sale Performance</h3>
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              {['Day', 'Month', 'Year', 'All Time'].map((period) => (
+      {/* Sales Performance and Category Section */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-4 sm:mb-5 md:mb-6">
+        {/* Sales Performance Chart */}
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100">
+          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900">Sale Performance</h3>
+            <div className="flex items-center bg-gray-100 rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-x-auto">
+              {['Day', 'Month', 'Year', 'All'].map((period) => (
                 <button
                   key={period}
-                  onClick={() => setTimePeriod(period.toLowerCase().replace(' ', '') as any)}
-                  className={`px-3 py-1.5 text-xs rounded-md transition-colors ${timePeriod === period.toLowerCase().replace(' ', '') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                  onClick={() => setTimePeriod(period.toLowerCase() as any)}
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs rounded-md transition-colors whitespace-nowrap ${timePeriod === period.toLowerCase() ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
                 >{period}</button>
               ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip />
-              <Line type="monotone" dataKey="sales" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', strokeWidth: 2 }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="h-44 sm:h-52 md:h-60 lg:h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" width={35} />
+                <Tooltip />
+                <Line type="monotone" dataKey="sales" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', strokeWidth: 2, r: 3 }} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         
-        <div className="col-span-12 lg:col-span-4 bg-white rounded-xl p-6 border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-4">Sale By Category</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value">
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="space-y-2 mt-4">
+        {/* Sales By Category Pie Chart */}
+        <div className="col-span-12 lg:col-span-4 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3 md:mb-4">Sale By Category</h3>
+          <div className="h-36 sm:h-44 md:h-48 lg:h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={categoryData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={2} dataKey="value">
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="space-y-1.5 sm:space-y-2 mt-2 sm:mt-3 md:mt-4">
             {categoryData.map((cat) => (
-              <div key={cat.name} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                  <span className="text-gray-600">{cat.name}</span>
+              <div key={cat.name} className="flex items-center justify-between text-xs sm:text-sm">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                  <span className="text-gray-600 truncate">{cat.name}</span>
                 </div>
-                <span className="font-medium text-gray-900">{cat.value}%</span>
+                <span className="font-medium text-gray-900 ml-2">{cat.value}%</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 lg:col-span-8 bg-white rounded-xl p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Best Selling Product</h3>
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              {['Day', 'Month', 'Year', 'All Time'].map((period) => (
-                <button key={period} className="px-3 py-1.5 text-xs rounded-md text-gray-600 hover:text-gray-900 transition-colors">{period}</button>
+      {/* Best Selling & Top Products Section */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+        {/* Best Selling Products Table */}
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100">
+          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900">Best Selling Product</h3>
+            <div className="flex items-center bg-gray-100 rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-x-auto">
+              {['Day', 'Month', 'Year', 'All'].map((period) => (
+                <button key={period} className="px-2 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs rounded-md text-gray-600 hover:text-gray-900 transition-colors whitespace-nowrap">{period}</button>
               ))}
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Product</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">SKU</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Price</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Sold</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(products?.slice(0, 5) || bestSellingProducts).map((product: any) => (
-                  <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Package className="w-5 h-5 text-gray-400" />
-                        </div>
-                        <span className="font-medium text-gray-900">{product.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-500">{product.sku || `SKU-${product.id}`}</td>
-                    <td className="py-3 px-4 text-right font-medium text-gray-900">৳{product.price || product.selling_price || 0}</td>
-                    <td className="py-3 px-4 text-right text-gray-600">{product.sold || product.totalSold || 0}</td>
+          <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-5 lg:-mx-6">
+            <div className="min-w-[400px] px-3 sm:px-4 md:px-5 lg:px-6">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm font-medium text-gray-500">Product</th>
+                    <th className="text-left py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm font-medium text-gray-500 hidden xs:table-cell">SKU</th>
+                    <th className="text-right py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm font-medium text-gray-500">Price</th>
+                    <th className="text-right py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm font-medium text-gray-500">Sold</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {(products?.slice(0, 5) || bestSellingProducts).map((product: any) => (
+                    <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                      <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-gray-100 rounded-md sm:rounded-lg flex items-center justify-center shrink-0">
+                            <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400" />
+                          </div>
+                          <span className="font-medium text-gray-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px] md:max-w-none">{product.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-500 hidden xs:table-cell">{product.sku || `SKU-${product.id}`}</td>
+                      <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-right font-medium text-gray-900 text-xs sm:text-sm">৳{product.price || product.selling_price || 0}</td>
+                      <td className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 text-right text-gray-600 text-xs sm:text-sm">{product.sold || product.totalSold || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         
-        <div className="col-span-12 lg:col-span-4 bg-white rounded-xl p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Top Products</h3>
+        {/* Top Products List */}
+        <div className="col-span-12 lg:col-span-4 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100">
+          <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900">Top Products</h3>
             <div className="relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input type="text" placeholder="Search..." className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-32" />
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2" />
+              <input type="text" placeholder="Search..." className="pl-7 sm:pl-9 pr-2 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-md sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 sm:w-32" />
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {(products?.slice(0, 5) || topProducts).map((product: any, index: number) => (
-              <div key={product.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">{index + 1}</span>
-                  <div>
-                    <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                    <p className="text-xs text-gray-500">৳{product.price || product.selling_price || 0}</p>
+              <div key={product.id} className="flex items-center justify-between p-2 sm:p-2.5 md:p-3 rounded-md sm:rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0">{index + 1}</span>
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-xs sm:text-sm truncate">{product.name}</p>
+                    <p className="text-[11px] sm:text-xs text-gray-500">৳{product.price || product.selling_price || 0}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <span className="text-sm font-medium text-gray-700">{product.rating || 4.5}</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-2">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-yellow-400" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">{product.rating || 4.5}</span>
                 </div>
               </div>
             ))}

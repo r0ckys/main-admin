@@ -72,42 +72,44 @@ const FigmaSalesByCategory: React.FC<FigmaSalesByCategoryProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-xl p-6 h-full flex flex-col"
+      className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 h-full flex flex-col hover:shadow-lg transition-shadow duration-300"
       style={{ 
         boxShadow: '0px 2px 9.6px rgba(0, 0, 0, 0.08)',
         fontFamily: 'Poppins, sans-serif'
       }}
     >
-      <h3 className="text-base font-semibold text-zinc-800 mb-4">Sale By Category</h3>
+      <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-semibold text-zinc-800 mb-2 sm:mb-3 md:mb-4 lg:mb-6">Sale By Category</h3>
       
       <div className="flex flex-col items-center flex-1">
         {/* Pie Chart - Donut style */}
-        <div className="w-44 h-44 relative mb-6">
+        <div className="w-28 sm:w-36 md:w-40 lg:w-48 xl:w-56 h-28 sm:h-36 md:h-40 lg:h-48 xl:h-56 relative mb-3 sm:mb-4 md:mb-6 lg:mb-8 group">
           <svg width="100%" height="100%" viewBox="0 0 200 200" className="transform -rotate-90">
             {segments.map((segment, index) => (
               <path
                 key={index}
                 d={createPath(segment.startAngle, segment.endAngle, 90, 50)}
                 fill={segment.color}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
+                className="hover:opacity-80 hover:scale-105 origin-center transition-all duration-300 cursor-pointer"
               />
             ))}
           </svg>
           {/* Center circle for donut effect */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 rounded-full bg-white shadow-inner"></div>
+            <div className="w-12 sm:w-16 md:w-20 lg:w-24 xl:w-28 h-12 sm:h-16 md:h-20 lg:h-24 xl:h-28 rounded-full bg-white shadow-inner flex items-center justify-center">
+              <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-bold text-zinc-600 hidden lg:block">100%</span>
+            </div>
           </div>
         </div>
         
         {/* Legend - Two columns */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 w-full">
+        <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 md:gap-x-6 lg:gap-x-8 gap-y-1 sm:gap-y-1.5 md:gap-y-2 lg:gap-y-3 w-full">
           {categories.map((category, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 cursor-pointer hover:opacity-70 transition-opacity group">
               <div 
-                className={`w-3 h-3 rounded-full flex-shrink-0 ${category.bgColor}`}
+                className={`w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-4 lg:h-4 rounded-full flex-shrink-0 ${category.bgColor} group-hover:scale-125 transition-transform`}
               ></div>
               <span 
-                className="text-xs text-zinc-500 truncate"
+                className="text-[10px] sm:text-xs lg:text-sm text-zinc-500 truncate"
                 style={{ fontFamily: 'Lato, sans-serif' }}
               >
                 {category.name}({category.percentage}%)
