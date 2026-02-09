@@ -58,7 +58,7 @@ import AIChatAssistant from '../components/AIChatAssistant';
 // Admin Components - directly imported for instant layout render
 import { AdminSidebar, AdminHeader } from '../components/AdminComponents';
 import AdminDueList from './AdminDueList';
-import { FigmaDashboardContent as AdminDashboard } from '../components/dashboard';
+import { FigmaDashboardPage as AdminDashboard, DashboardLayout } from '../components/dashboard';
 
 // Preload critical admin chunks on idle - only when admin view is triggered
 let adminChunksPreloaded = false;
@@ -172,42 +172,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   userPermissions = {}
 }) => {
   const highlightPage = activePage.startsWith('settings') ? 'settings' : activePage;
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="admin-theme flex h-screen font-sans text-gray-900 bg-[#F8FAFC]">
-      <AdminSidebar
-        activePage={highlightPage}
-        onNavigate={onNavigate}
-        logo={logo}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        userRole={user?.role}
-        permissions={userPermissions}
-        isCollapsed={highlightPage === 'store_studio'}
-      />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F8FAFC]">
-        <AdminHeader
-          onSwitchView={onSwitchView}
-          user={user}
-          onLogout={onLogout}
-          onNavigateToProfile={() => onNavigate('profile')}
-          logo={logo}
-          tenants={tenants}
-          activeTenantId={activeTenantId}
-          onTenantChange={onTenantChange}
-          isTenantSwitching={isTenantSwitching}
-          onOpenChatCenter={onOpenChatCenter}
-          hasUnreadChat={hasUnreadChat}
-          onMenuClick={() => setIsSidebarOpen(true)}
-        />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-0 md:p-0 bg-[#F8FAFC]">
-          <div className="animate-fade-in">
-            {children}
-          </div>
-        </main>
+    <DashboardLayout
+      sidebarProps={{
+        activeItem: highlightPage,
+        onNavigate: onNavigate
+      }}
+      headerProps={{
+        user,
+        tenantId: activeTenantId,
+        searchQuery: '',
+        onSearchChange: () => {},
+        onSearch: () => {}
+      }}
+    >
+      <div className="animate-fade-in">
+        {children}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
@@ -616,7 +599,16 @@ const AdminApp: React.FC<AdminAppProps> = ({
 
   return (
     <LanguageProvider tenantId={activeTenantId}>
-      <AdminLayout
+      {adminSection === 'dashboard' ? (
+        <AdminDashboard 
+          orders={orders} 
+          products={products} 
+          tenantId={activeTenantId} 
+          user={user} 
+          onNavigate={setAdminSection}
+        />
+      ) : (
+        <AdminLayout
         onSwitchView={onSwitchToStore}
         activePage={adminSection}
         onNavigate={setAdminSection}
@@ -632,7 +624,7 @@ const AdminApp: React.FC<AdminAppProps> = ({
         userPermissions={userPermissions}
       >
         <Suspense fallback={<PageLoadingFallback section={adminSection} />}>
-          {adminSection === 'dashboard' ? <AdminDashboard orders={orders} products={products} tenantId={activeTenantId} user={user} /> :
+          {
             adminSection === 'orders' ? <AdminOrders orders={orders} courierConfig={courierConfig} onUpdateOrder={onUpdateOrder} /> :
               adminSection === 'products' ? <AdminProducts products={products} categories={categories} subCategories={subCategories} childCategories={childCategories} brands={brands} tags={tags} onAddProduct={onAddProduct} onUpdateProduct={onUpdateProduct} onDeleteProduct={onDeleteProduct} onBulkDelete={onBulkDeleteProducts} onBulkUpdate={onBulkUpdateProducts} tenantId={activeTenantId} onAddCategory={catHandlers.add} onAddSubCategory={subCatHandlers.add} onAddChildCategory={childCatHandlers.add} onAddTag={tagHandlers.add} onLogout={onLogout} onSwitchSection={setAdminSection} activeSection={adminSection} /> :
                 adminSection === 'product-upload' ? <AdminProductUpload categories={categories} subCategories={subCategories} childCategories={childCategories} brands={brands} tags={tags} onAddProduct={onAddProduct} onLogout={onLogout} onSwitchSection={setAdminSection} /> :
@@ -665,7 +657,8 @@ const AdminApp: React.FC<AdminAppProps> = ({
           }
         </Suspense>
         <AIChatAssistant tenantId={activeTenantId} shopName={selectedTenantRecord?.name} onNavigate={setAdminSection} />
-      </AdminLayout>
+        </AdminLayout>
+      )}
     </LanguageProvider>
   );
 };
